@@ -1,0 +1,25 @@
+{
+  "name": "booster-nft-dapp",
+  "version": "1.0.0",
+  "description": "Booster NFT dApp with Quest Game and Real Life Game",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy": "hardhat run scripts/deploy.js --network localhost",
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && php artisan serve --host=127.0.0.1 --port=8282",
+    "monitor": "node monitor.js",
+    "start": "node monitor.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "erc721a": "^4.3.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

@@ -1,0 +1,17 @@
+[
+  { "id": 1, "name": "e-car", "image": "e-car.png" },
+  { "id": 2, "name": "e-bike", "image": "e-bike.png" },
+  { "id": 3, "name": "e-roller", "image": "e-roller.png" },
+  { "id": 4, "name": "e-scooter", "image": "e-scooter.png" },
+  { "id": 5, "name": "smart-home", "image": "smart-home.png" },
+  { "id": 6, "name": "solar-inverter", "image": "solar-inverter.png" },
+  { "id": 7, "name": "home-battery", "image": "home-battery.png" },
+  { "id": 8, "name": "smart-meter", "image": "smart-meter.png" },
+  { "id": 9, "name": "charging-station", "image": "charging-station.png" },
+  { "id": 10, "name": "heat-pump", "image": "heat-pump.png" },
+  { "id": 11, "name": "solar-panel", "image": "solar-panel.png" },
+  { "id": 12, "name": "electric-boiler", "image": "electric-boiler.png" },
+  { "id": 13, "name": "power-bank", "image": "power-bank.png" },
+  { "id": 14, "name": "charge-controller", "image": "charge-controller.png" },
+  { "id": 15, "name": "smartphone", "image": "smartphone.png" }
+]

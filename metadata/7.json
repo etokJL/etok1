@@ -1,0 +1,10 @@
+{
+  "name": "home-battery",
+  "description": "Part of the Energy Quest Series. Collect all 15 types to claim a real-life token.",
+  "image": "metadata/images/home-battery.png",
+  "attributes": [
+    { "trait_type": "Type", "value": "home-battery" },
+    { "trait_type": "Series", "value": "Energy Quest" },
+    { "trait_type": "ID", "value": 7 }
+  ]
+}

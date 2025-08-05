@@ -1,0 +1,10 @@
+{
+  "name": "charging-station",
+  "description": "Part of the Energy Quest Series. Collect all 15 types to claim a real-life token.",
+  "image": "metadata/images/charging-station.png",
+  "attributes": [
+    { "trait_type": "Type", "value": "charging-station" },
+    { "trait_type": "Series", "value": "Energy Quest" },
+    { "trait_type": "ID", "value": 9 }
+  ]
+}

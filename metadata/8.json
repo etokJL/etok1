@@ -1,0 +1,10 @@
+{
+  "name": "smart-meter",
+  "description": "Part of the Energy Quest Series. Collect all 15 types to claim a real-life token.",
+  "image": "metadata/images/smart-meter.png",
+  "attributes": [
+    { "trait_type": "Type", "value": "smart-meter" },
+    { "trait_type": "Series", "value": "Energy Quest" },
+    { "trait_type": "ID", "value": 8 }
+  ]
+}

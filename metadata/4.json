@@ -1,0 +1,10 @@
+{
+  "name": "e-scooter",
+  "description": "Part of the Energy Quest Series. Collect all 15 types to claim a real-life token.",
+  "image": "metadata/images/e-scooter.png",
+  "attributes": [
+    { "trait_type": "Type", "value": "e-scooter" },
+    { "trait_type": "Series", "value": "Energy Quest" },
+    { "trait_type": "ID", "value": 4 }
+  ]
+}

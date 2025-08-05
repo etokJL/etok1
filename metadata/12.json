@@ -1,0 +1,10 @@
+{
+  "name": "electric-boiler",
+  "description": "Part of the Energy Quest Series. Collect all 15 types to claim a real-life token.",
+  "image": "metadata/images/electric-boiler.png",
+  "attributes": [
+    { "trait_type": "Type", "value": "electric-boiler" },
+    { "trait_type": "Series", "value": "Energy Quest" },
+    { "trait_type": "ID", "value": 12 }
+  ]
+}

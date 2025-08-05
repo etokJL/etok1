@@ -1,0 +1,10 @@
+{
+  "name": "smart-home",
+  "description": "Part of the Energy Quest Series. Collect all 15 types to claim a real-life token.",
+  "image": "metadata/images/smart-home.png",
+  "attributes": [
+    { "trait_type": "Type", "value": "smart-home" },
+    { "trait_type": "Series", "value": "Energy Quest" },
+    { "trait_type": "ID", "value": 5 }
+  ]
+}

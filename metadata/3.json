@@ -1,0 +1,10 @@
+{
+  "name": "e-roller",
+  "description": "Part of the Energy Quest Series. Collect all 15 types to claim a real-life token.",
+  "image": "metadata/images/e-roller.png",
+  "attributes": [
+    { "trait_type": "Type", "value": "e-roller" },
+    { "trait_type": "Series", "value": "Energy Quest" },
+    { "trait_type": "ID", "value": 3 }
+  ]
+}
