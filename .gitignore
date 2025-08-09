@@ -5,6 +5,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 frontend/.next/cache/
+frontend/.next/static/
+frontend/.next/trace/
 
 # Build outputs
 dist/
