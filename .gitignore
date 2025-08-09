@@ -170,7 +170,3 @@ config/services.php
 # Monitoring and process files
 monitor-fixed.js
 start-system.sh
-
-# Documentation files (optional - remove if you want to keep them)
-*.md
-!README.md
