@@ -1,25 +1,67 @@
 {
-  "name": "booster-frontend",
-  "version": "0.1.0",
+  "name": "booster-collection-frontend",
+  "version": "1.0.0",
   "private": true,
+  "description": "Swiss-quality Web3 frontend for Booster energy NFT collection platform",
+  "author": "Booster Team",
+  "license": "PROPRIETARY",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "analyze": "ANALYZE=true npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "next": "14.0.0",
-    "react": "^18",
-    "react-dom": "^18",
-    "ethers": "^6.8.0",
-    "wagmi": "^1.4.0",
-    "@wagmi/core": "^1.4.0",
-    "@wagmi/connectors": "^3.1.0",
-    "viem": "^1.16.0"
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
+    "@tailwindcss/forms": "^0.5.9",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@tailwindcss/typography": "^0.5.15",
+    "@tanstack/react-query": "^5.62.7",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.0.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15.1.3",
+    "pino-pretty": "^13.1.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tailwind-merge": "^2.6.0",
+    "viem": "^2.21.57",
+    "wagmi": "^2.14.5"
   },
   "devDependencies": {
-    "eslint": "^8",
-    "eslint-config-next": "14.0.0"
-  }
+    "@next/bundle-analyzer": "^15.1.3",
+    "@types/node": "^22.10.6",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.1.3",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "web3",
+    "nft",
+    "blockchain",
+    "next.js",
+    "react",
+    "tailwindcss",
+    "framer-motion",
+    "wagmi",
+    "typescript",
+    "swiss-quality"
+  ]
 }
