@@ -172,12 +172,15 @@ export function TradingInterface({ userTokens, onTradeComplete }: TradingInterfa
                     Select Tokens to Offer ({selectedTokens.length})
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
-                    {userTokens.map(token => (
-                      <button
+                   {userTokens.map(token => (
+                      <div
                         key={token.id}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => handleTokenSelect(token)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
                             handleTokenSelect(token)
                           }
                         }}
@@ -186,14 +189,13 @@ export function TradingInterface({ userTokens, onTradeComplete }: TradingInterfa
                             ? 'ring-2 ring-blue-500 scale-105'
                             : 'hover:scale-102'
                         }`}
-                        type="button"
                       >
                         <EnhancedTokenCard
                           token={token}
                           viewMode="grid"
                           onViewDetails={() => {}}
                         />
-                      </button>
+                      </div>
                     ))}
                   </div>
                 </div>

@@ -186,7 +186,7 @@ export function TokenDetailModal({ token, isOpen, onClose }: TokenDetailModalPro
 
             <div className="flex flex-col lg:flex-row max-h-[calc(90vh-120px)] overflow-y-auto">
               {/* Image Section */}
-              <div className="lg:w-1/2 p-6">
+              <div className="lg:w-1/2 p-6 sticky top-0 self-start">
                 <div className="relative aspect-square bg-gradient-to-br from-blue-50 to-green-50 rounded-xl overflow-hidden shadow-inner">
                   {/* Token Image */}
                   {!imageError && (

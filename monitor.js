@@ -5,6 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 
+// Monitor-only mode: do not start services, only display and health-check
+const MONITOR_ONLY = process.env.MONITOR_ONLY === '1' || process.env.MONITOR_ONLY === 'true' || process.argv.includes('--monitor-only');
+
 /**
  * 🌱 Booster NFT dApp System Monitor
  * Starts and monitors all services with heartbeat checks
@@ -46,6 +49,7 @@ class ServiceMonitor {
         this.isShuttingDown = false;
         this.heartbeatInterval = 30000; // 30 seconds
         this.startTime = Date.now();
+        this.monitorOnly = MONITOR_ONLY;
         
         // Graceful shutdown
         process.on('SIGINT', () => this.shutdown());
@@ -252,11 +256,15 @@ class ServiceMonitor {
 
     async startMonitoring() {
         console.log('\n🚀 Starting Booster NFT dApp System Monitor...\n');
-        
-        // Start all services
-        for (const serviceName of Object.keys(this.config)) {
-            await this.startService(serviceName);
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Stagger starts
+
+        if (this.monitorOnly) {
+            this.log('monitor', 'Monitor-only mode enabled: not starting services', 'WARN');
+        } else {
+            // Start all services
+            for (const serviceName of Object.keys(this.config)) {
+                await this.startService(serviceName);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Stagger starts
+            }
         }
 
         // Start status display
@@ -265,8 +273,10 @@ class ServiceMonitor {
 
         // Start health monitoring
         setInterval(() => this.performHealthCheck(), this.heartbeatInterval);
-        
-        console.log('\n🎉 Monitor started! All services are initializing...\n');
+
+        console.log(this.monitorOnly
+            ? '\n🎉 Monitor started in monitor-only mode. Waiting for services...\n'
+            : '\n🎉 Monitor started! All services are initializing...\n');
     }
 
     async shutdown() {

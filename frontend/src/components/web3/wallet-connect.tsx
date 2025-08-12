@@ -16,7 +16,7 @@ export function WalletConnect() {
   const { connect, connectors, isPending } = useConnect()
   const { disconnect } = useDisconnect()
   const { data: ensName } = useEnsName({ address })
-  const { data: ensAvatar } = useEnsAvatar({ name: ensName! })
+  const { data: ensAvatar } = useEnsAvatar({ name: ensName ?? undefined })
 
   const handleCopyAddress = async () => {
     if (address) {
@@ -43,7 +43,7 @@ export function WalletConnect() {
         >
           <Button
             variant="outline"
-            className="flex items-center gap-3 h-12 px-4 bg-white/80 backdrop-blur-sm border-gray-200 hover:bg-white"
+            className="flex items-center gap-3 h-12 px-4 bg-card/80 backdrop-blur-sm border-border hover:bg-card"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {/* Avatar */}
@@ -57,7 +57,7 @@ export function WalletConnect() {
                   className="rounded-full"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-medium">
+                <div className="w-8 h-8 rounded-full bg-primary/90 flex items-center justify-center text-primary-foreground text-sm font-medium">
                   {address.slice(2, 4).toUpperCase()}
                 </div>
               )}
@@ -66,7 +66,7 @@ export function WalletConnect() {
 
             {/* Address/ENS */}
             <div className="flex flex-col items-start">
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-foreground">
                 {ensName || formatAddress(address)}
               </span>
               <div className="flex items-center gap-1">
@@ -76,7 +76,7 @@ export function WalletConnect() {
               </div>
             </div>
 
-            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
           </Button>
         </motion.div>
 
@@ -101,7 +101,7 @@ export function WalletConnect() {
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="shadow-xl border-gray-200">
+                <Card className="shadow-xl border border-border bg-card">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
                       {ensAvatar ? (
@@ -112,8 +112,8 @@ export function WalletConnect() {
                           height={48}
                           className="rounded-full"
                         />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-lg font-medium">
+                       ) : (
+                        <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center text-primary-foreground text-lg font-medium">
                           {address.slice(2, 4).toUpperCase()}
                         </div>
                       )}
@@ -121,7 +121,7 @@ export function WalletConnect() {
                         <CardTitle className="text-lg">
                           {ensName || 'Wallet Connected'}
                         </CardTitle>
-                        <p className="text-sm text-gray-600 font-mono">
+                         <p className="text-sm text-muted-foreground font-mono">
                           {formatAddress(address)}
                         </p>
                       </div>
@@ -130,8 +130,8 @@ export function WalletConnect() {
 
                   <CardContent className="space-y-3">
                     {/* Network Info */}
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">Network</span>
+                    <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                      <span className="text-sm font-medium text-foreground">Network</span>
                       <Badge variant={chainId === 1 ? 'success' : 'warning'}>
                         {chainId === 1 ? 'Ethereum Mainnet' : 'Sepolia Testnet'}
                       </Badge>
@@ -161,7 +161,7 @@ export function WalletConnect() {
 
                       <Button
                         variant="ghost"
-                        className="w-full justify-start h-10 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="w-full justify-start h-10 text-destructive hover:text-destructive-foreground/90 hover:bg-accent"
                         onClick={() => {
                           disconnect()
                           setIsMenuOpen(false)
@@ -190,16 +190,16 @@ export function WalletConnect() {
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <motion.div
-            className="mx-auto w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center mb-4"
+            className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-primary text-primary-foreground"
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <Wallet className="w-8 h-8 text-white" />
           </motion.div>
-          <CardTitle className="text-2xl text-gray-900">
+          <CardTitle className="text-2xl text-foreground">
             Connect Your Wallet
           </CardTitle>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             Choose your preferred wallet to access your NFT collection
           </p>
         </CardHeader>
@@ -213,7 +213,7 @@ export function WalletConnect() {
             >
               <Button
                 variant="outline"
-                className="w-full h-14 justify-between bg-white hover:bg-gray-50 border-gray-200"
+                className="w-full h-14 justify-between bg-card hover:bg-accent border-border"
                 onClick={() => connect({ connector })}
                 disabled={isPending}
               >
@@ -221,14 +221,14 @@ export function WalletConnect() {
                   <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
                     {getConnectorIcon(connector.name)}
                   </div>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-medium text-foreground">
                     {connector.name}
                   </span>
                 </div>
                 
                 {isPending && (
                   <motion.div
-                    className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full"
+                    className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                   />
@@ -239,16 +239,16 @@ export function WalletConnect() {
 
           {/* Swiss Quality Assurance */}
           <motion.div
-            className="mt-6 p-4 bg-gradient-to-r from-red-50 to-white rounded-lg border border-red-100"
+            className="mt-6 p-4 rounded-lg border border-border bg-secondary"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center gap-2 mb-2">
-                              <span className="text-lg"></span>
-              <span className="font-medium text-gray-900">Swiss Quality</span>
+              <span className="text-lg"></span>
+              <span className="font-medium text-foreground">Swiss Quality</span>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Your connection is secured with Swiss-standard encryption and privacy protection.
             </p>
           </motion.div>

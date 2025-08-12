@@ -78,27 +78,37 @@ export function EnhancedNFTCard({ nft, onSelect, isSelected, showQuantity = true
       )}
 
       {/* Main Card */}
-      <div className="card overflow-hidden relative">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative group transition-all duration-300 hover:shadow-xl">
         {/* Swiss Quality Badge */}
-        <div className="absolute top-2 right-2 z-20">
-                          <span className="text-lg"></span>
+        <div className="absolute top-3 right-3 z-20">
+          <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center space-x-1">
+            <span>🇨🇭</span>
+            <span>SWISS</span>
+          </div>
         </div>
 
         {/* Quantity Badge */}
         {showQuantity && nft.quantity > 0 && (
-          <div className="absolute top-2 left-2 z-20">
+          <div className="absolute top-3 left-3 z-20">
             <motion.div
-              className="bg-white bg-opacity-90 text-gray-800 text-sm font-bold px-2 py-1 rounded-full border"
+              className="bg-black bg-opacity-80 text-white text-sm font-bold px-3 py-1.5 rounded-full backdrop-blur-sm"
               animate={{ scale: isSelected ? 1.1 : 1 }}
             >
-              x{nft.quantity}
+              ×{nft.quantity}
             </motion.div>
           </div>
         )}
 
+        {/* Rarity Badge */}
+        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-20">
+          <div className={`px-3 py-1 rounded-full text-xs font-semibold border ${rarityColors[nft.nftType.rarity]}`}>
+            {nft.nftType.rarity}
+          </div>
+        </div>
+
         {/* Image Area */}
         <button 
-          className="relative h-48 bg-gradient-to-br from-blue-50 to-green-50 overflow-hidden cursor-pointer w-full border-0 p-0"
+          className="relative h-64 bg-gradient-to-br from-blue-50 via-green-50 to-purple-50 overflow-hidden cursor-pointer w-full border-0 p-0 group-hover:from-blue-100 group-hover:via-green-100 group-hover:to-purple-100 transition-all duration-300"
           onClick={handleCardClick}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -143,49 +153,70 @@ export function EnhancedNFTCard({ nft, onSelect, isSelected, showQuantity = true
         </button>
 
         {/* Card Content */}
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-gray-900 truncate flex-1">
-              {nft.nftType.name}
-            </h3>
+        <div className="p-6 space-y-4">
+          {/* Header with Energy Type */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">{energyIcons[nft.nftType.energyType]}</span>
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg leading-tight">
+                  {nft.nftType.name}
+                </h3>
+                <p className="text-sm text-gray-500">{nft.nftType.energyType} Energy</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-bold text-gray-900">#{nft.tokenId.toString()}</div>
+              <div className="text-xs text-gray-500">Token ID</div>
+            </div>
           </div>
 
-          {/* Rarity Badge */}
-          <div className="mb-3">
-            <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full border ${rarityColors[nft.nftType.rarity]}`}>
-              {nft.nftType.rarity}
-            </span>
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-50 rounded-lg p-3 text-center">
+              <div className="text-sm font-semibold text-gray-900">{nft.nftType.rarity}</div>
+              <div className="text-xs text-gray-500">Rarity</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 text-center">
+              <div className="text-sm font-semibold text-gray-900">Swiss</div>
+              <div className="text-xs text-gray-500">Quality</div>
+            </div>
           </div>
 
           {/* Description */}
           {nft.nftType.description && (
-            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            <p className="text-sm text-gray-600 leading-relaxed">
               {nft.nftType.description}
             </p>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2">
+          <div className="flex gap-3 pt-2">
             <motion.button
-              className="btn btn-outline flex-1 text-sm"
+              className={`flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all ${
+                isSelected 
+                  ? 'bg-red-500 text-white hover:bg-red-600' 
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
               whileTap={{ scale: 0.95 }}
               onClick={(e) => {
                 e.stopPropagation()
                 handleClick()
               }}
             >
-              {isSelected ? "Remove" : "Select"}
+              {isSelected ? "✕ Remove" : "✓ Select"}
             </motion.button>
             
             <motion.button
-              className="btn btn-primary text-sm px-3"
+              className="py-2.5 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-all flex items-center space-x-1"
               whileTap={{ scale: 0.95 }}
               onClick={(e) => {
                 e.stopPropagation()
                 setShowDetailModal(true)
               }}
             >
-              👁️
+              <span>👁️</span>
+              <span>Details</span>
             </motion.button>
           </div>
         </div>

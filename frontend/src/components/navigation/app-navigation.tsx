@@ -35,15 +35,15 @@ export function AppNavigation({
   return (
     <>
       {/* Desktop Navigation */}
-      <div className="hidden md:block bg-white border-b shadow-sm">
+      <div className="hidden md:block bg-card border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo and Brand */}
             <div className="flex items-center space-x-3">
               <div className="text-2xl">🇨🇭</div>
               <div>
-                <h1 className="text-lg font-bold">Booster Collection</h1>
-                <p className="text-xs text-gray-600">Energy NFTs</p>
+                <h1 className="text-lg font-bold text-foreground">Booster Collection</h1>
+                <p className="text-xs text-muted-foreground">Energy NFTs</p>
               </div>
             </div>
 
@@ -55,8 +55,8 @@ export function AppNavigation({
                   onClick={() => onTabChange(tab.id)}
                   className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     activeTab === tab.id
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                   }`}
                   type="button"
                 >
@@ -64,14 +64,14 @@ export function AppNavigation({
                     <span>{tab.icon}</span>
                     <span>{tab.label}</span>
                     {tab.count !== null && (
-                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
+                      <span className="bg-accent text-muted-foreground px-2 py-1 rounded-full text-xs">
                         {tab.count}
                       </span>
                     )}
                   </div>
                   {activeTab === tab.id && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
                       layoutId="activeTab"
                     />
                   )}
@@ -81,9 +81,15 @@ export function AppNavigation({
 
             {/* User Info */}
             <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-600">
-                {address && formatAddress(address)}
-              </div>
+              {address && (
+                <div className="flex items-center space-x-2 bg-accent px-3 py-2 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="text-sm">
+                    <div className="text-xs text-muted-foreground">Connected</div>
+                    <div className="font-mono font-medium text-foreground">{formatAddress(address)}</div>
+                  </div>
+                </div>
+              )}
               <button
                 onClick={() => disconnect()}
                 className="btn btn-outline text-sm"
@@ -97,22 +103,22 @@ export function AppNavigation({
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden bg-white border-b shadow-sm">
+      <div className="md:hidden bg-card border-b border-border shadow-sm">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Mobile Header */}
             <div className="flex items-center space-x-3">
               <div className="text-xl">🇨🇭</div>
               <div>
-                <h1 className="text-base font-bold">Booster Collection</h1>
-                <p className="text-xs text-gray-600">Energy NFTs</p>
+                <h1 className="text-base font-bold text-foreground">Booster Collection</h1>
+                <p className="text-xs text-muted-foreground">Energy NFTs</p>
               </div>
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100"
+              className="p-2 rounded-lg hover:bg-accent"
               type="button"
             >
               <div className="w-5 h-5 flex flex-col justify-center space-y-1">
@@ -136,7 +142,7 @@ export function AppNavigation({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-4 space-y-2"
+                 className="mt-4 space-y-2"
               >
                 {/* Mobile Navigation Tabs */}
                 {tabs.map(tab => (
@@ -148,8 +154,8 @@ export function AppNavigation({
                     }}
                     className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-all ${
                       activeTab === tab.id
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                     }`}
                     type="button"
                   >
@@ -158,7 +164,7 @@ export function AppNavigation({
                       <span className="font-medium">{tab.label}</span>
                     </div>
                     {tab.count !== null && (
-                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
+                      <span className="bg-accent text-muted-foreground px-2 py-1 rounded-full text-xs">
                         {tab.count}
                       </span>
                     )}
@@ -167,18 +173,22 @@ export function AppNavigation({
 
                 {/* Mobile User Info */}
                 <div className="border-t pt-3 mt-3">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      {address && formatAddress(address)}
+                  {address && (
+                    <div className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg mb-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="text-xs text-gray-500">Connected Wallet</div>
+                        <div className="font-mono text-sm font-medium text-gray-900">{formatAddress(address)}</div>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => disconnect()}
-                      className="btn btn-outline text-sm"
-                      type="button"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
+                  )}
+                  <button
+                    onClick={() => disconnect()}
+                    className="w-full btn btn-outline text-sm"
+                    type="button"
+                  >
+                    Disconnect Wallet
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -187,20 +197,20 @@ export function AppNavigation({
       </div>
 
       {/* Stats Bar (Mobile) */}
-      <div className="md:hidden bg-gray-50 border-b">
+       <div className="md:hidden bg-secondary border-b border-border">
         <div className="px-4 py-3">
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-lg font-bold text-blue-600">{totalNFTs}</div>
-              <div className="text-xs text-gray-600">Total NFTs</div>
+               <div className="text-lg font-bold text-primary">{totalNFTs}</div>
+               <div className="text-xs text-muted-foreground">Total NFTs</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-bold text-green-600">{uniqueTypes}</div>
-              <div className="text-xs text-gray-600">Unique Types</div>
+               <div className="text-lg font-bold text-primary">{uniqueTypes}</div>
+               <div className="text-xs text-muted-foreground">Unique Types</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-bold text-purple-600">{plantsCreated}</div>
-              <div className="text-xs text-gray-600">Plants</div>
+               <div className="text-lg font-bold text-primary">{plantsCreated}</div>
+               <div className="text-xs text-muted-foreground">Plants</div>
             </div>
           </div>
         </div>

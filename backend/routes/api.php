@@ -6,6 +6,7 @@ use App\Models\AppUser;
 use App\Models\AppToken;
 use App\Models\Airdrop;
 use App\Http\Controllers\VisibilityController;
+use App\Http\Controllers\ClientSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,5 +54,15 @@ Route::prefix('v1')->group(function () {
             'erc721a_tokens' => AppToken::where('token_type', 'erc721a')->count(),
             'erc1155_tokens' => AppToken::where('token_type', 'erc1155')->count(),
         ];
+    });
+
+    // Client Session Management
+    Route::prefix('client-session')->group(function () {
+        Route::post('/init', [ClientSessionController::class, 'initSession']);
+        Route::post('/sync', [ClientSessionController::class, 'syncSession']);
+        Route::get('/status', [ClientSessionController::class, 'getAnimationStatus']);
+        Route::get('/{sessionId}', [ClientSessionController::class, 'getSession']);
+        Route::post('/animation/mint/shown', [ClientSessionController::class, 'markMintAnimationShown']);
+        Route::post('/animation/burn/shown', [ClientSessionController::class, 'markBurnAnimationShown']);
     });
 });

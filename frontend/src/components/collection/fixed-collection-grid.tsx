@@ -122,9 +122,9 @@ export function FixedCollectionGrid({ nfts, onNFTSelect, onCreatePlant }: FixedC
   // Get grid classes based on view mode
   const getGridClasses = () => {
     if (viewMode === 'grid') {
-      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4'
+      return 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7 gap-6'
     }
-    return 'grid grid-cols-1 gap-4'
+    return 'grid grid-cols-1 gap-6'
   }
 
   return (

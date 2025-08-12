@@ -24,7 +24,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
 
   return (
     <motion.header
-      className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b"
+      className="sticky top-0 z-50 backdrop-blur-md border-b bg-card/90"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
     >
@@ -37,8 +37,8 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
           >
             <Link href="/" className="flex items-center gap-3">
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Booster</h1>
-                <p className="text-sm text-gray-600 hidden sm:block">Energy NFT Collection</p>
+                <h1 className="text-xl font-bold text-foreground">Booster</h1>
+                <p className="text-sm text-muted-foreground hidden sm:block">Energy NFT Collection</p>
               </div>
             </Link>
           </motion.div>
@@ -50,8 +50,8 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
                 <motion.div
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     item.active
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -63,7 +63,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
             ))}
             <Link href="/disclaimer">
               <motion.div
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -77,7 +77,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
           <div className="flex items-center gap-4">
             {/* Quality Badge */}
             <motion.div
-              className="hidden sm:flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm border border-blue-200"
+              className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-sm border text-primary border-primary/30 bg-primary/10"
               animate={{ rotate: [0, 1, -1, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
@@ -89,7 +89,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
               <div className="relative">
                 <motion.button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium border border-green-200"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border text-primary border-primary/30 bg-primary/10"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -104,17 +104,17 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
                 <AnimatePresence>
                   {isMenuOpen && (
                     <motion.div
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                      className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border z-50 border-border"
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                     >
                       <div className="p-2">
-                        <div className="px-3 py-2 text-sm text-gray-500 border-b">
+                        <div className="px-3 py-2 text-sm text-muted-foreground border-b border-border">
                           Connected Account
                         </div>
-                        <div className="px-3 py-2 text-sm font-mono text-gray-900">
+                        <div className="px-3 py-2 text-sm font-mono text-foreground">
                           {address}
                         </div>
                         <button
@@ -123,7 +123,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
                             disconnect()
                             setIsMenuOpen(false)
                           }}
-                          className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded text-left"
+                          className="w-full px-3 py-2 text-sm text-destructive hover:bg-accent rounded text-left"
                         >
                           Disconnect
                         </button>
@@ -134,7 +134,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
               </div>
             ) : (
               <motion.div
-                className="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm"
+                className="px-3 py-2 bg-accent text-muted-foreground rounded-lg text-sm"
                 animate={{ opacity: [1, 0.5, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
@@ -146,7 +146,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
             <button
               type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 text-gray-600 hover:text-gray-900"
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground"
               aria-label="Toggle mobile menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -160,7 +160,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              className="md:hidden border-t bg-white"
+              className="md:hidden border-t bg-card"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -171,8 +171,8 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
                     <motion.div
                       className={`block px-3 py-2 rounded-md text-base font-medium ${
                         item.active
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                       }`}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsMenuOpen(false)}

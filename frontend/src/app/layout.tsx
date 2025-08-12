@@ -80,8 +80,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 font-sans antialiased">
+    <html lang="en" className={inter.variable} suppressHydrationWarning data-theme="marine">
+      <body className="min-h-screen bg-background font-sans antialiased overflow-x-hidden overflow-y-auto">
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             <main className="flex-1">

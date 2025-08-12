@@ -29,6 +29,15 @@ npm run deploy
 npm run frontend
 ```
 
+### Alternative: macOS mit automatischer Fenster-Aufteilung
+```bash
+# Öffnet 3 neue Terminal-Fenster (Hardhat, Backend, Frontend)
+# und startet den zentralen Monitor im aktuellen Fenster
+./start-system.sh
+```
+
+Details siehe `MONITOR-USAGE.md`.
+
 ### 5. MetaMask einrichten
 1. MetaMask öffnen
 2. Neues Netzwerk hinzufügen:

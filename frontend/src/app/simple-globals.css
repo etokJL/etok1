@@ -1,33 +1,51 @@
+@import './themes/marine.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Simple base styles without custom CSS variables */
+/* Base styles using theme CSS variables */
 html {
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+@layer base {
+  :root {
+    /* Fallbacks in case no data-theme is set */
+    --background: 0 0% 100%;
+    --foreground: 220 15% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 12%;
+    --border: 220 13% 90%;
+    --accent: 220 14% 94%;
+    --accent-foreground: 220 15% 15%;
+    --primary: 210 80% 35%;
+    --primary-foreground: 210 40% 98%;
+  }
+}
+
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  color: #1e293b;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   min-height: 100vh;
 }
 
-/* Card styles */
+/* Card styles (tokenized) */
 .card {
-  background: white;
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
   border-radius: 12px;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  border: 1px solid #e2e8f0;
+  border: 1px solid hsl(var(--border));
 }
 
 .card-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 .card-content {
@@ -50,24 +68,24 @@ body {
 }
 
 .btn-primary {
-  background: #3b82f6;
-  color: white;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 }
 
 .btn-primary:hover {
-  background: #2563eb;
+  filter: brightness(0.95);
   transform: translateY(-1px);
 }
 
 .btn-outline {
-  background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
 }
 
 .btn-outline:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: hsl(var(--accent));
+  border-color: hsl(var(--border));
 }
 
 /* Swiss quality indicator */
@@ -76,33 +94,7 @@ body {
   margin-right: 0.5rem;
 }
 
-/* Responsive grid */
-.grid {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.grid-cols-1 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-@media (min-width: 640px) {
-  .sm\\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 768px) {
-  .md\\:grid-cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .lg\\:grid-cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
+/* Responsive grid - rely on Tailwind utilities instead of redefining */
 
 /* Utility classes */
 .text-center { text-align: center; }

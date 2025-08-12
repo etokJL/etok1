@@ -1,9 +1,11 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { UserNFT } from '@/types/nft'
 import { X, ExternalLink, Copy } from 'lucide-react'
 import { useState } from 'react'
+import { formatAddress } from '@/lib/utils'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 
 interface NFTDetailModalProps {
   nft: UserNFT | null
@@ -62,31 +64,21 @@ export function NFTDetailModal({ nft, isOpen, onClose }: NFTDetailModalProps) {
     }
   }
 
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
+
 
   if (!nft) return null
 
   return (
-    <AnimatePresence>
-      {isOpen && (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="p-0 bg-white text-foreground rounded-2xl overflow-hidden">
+        <DialogTitle className="sr-only">{nft.nftType.name}</DialogTitle>
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-75 backdrop-blur-sm"
-          variants={modalVariants}
+          className="bg-white rounded-2xl"
+          variants={cardVariants}
           initial="hidden"
           animate="visible"
-          exit="hidden"
-          onClick={onClose}
+          exit="exit"
         >
-          <motion.div
-            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onClick={(e) => e.stopPropagation()}
-          >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div className="flex items-center gap-3">
@@ -105,9 +97,9 @@ export function NFTDetailModal({ nft, isOpen, onClose }: NFTDetailModalProps) {
               </button>
             </div>
 
-            <div className="flex flex-col lg:flex-row">
+            <div className="flex flex-col lg:flex-row max-h-[calc(90vh-120px)] overflow-y-auto">
               {/* Image Section */}
-              <div className="lg:w-1/2 p-6">
+              <div className="lg:w-1/2 p-6 sticky top-0 self-start">
                 <div className="relative aspect-square bg-gradient-to-br from-blue-50 to-green-50 rounded-xl overflow-hidden">
                   {/* NFT Image */}
                   <img
@@ -157,30 +149,53 @@ export function NFTDetailModal({ nft, isOpen, onClose }: NFTDetailModalProps) {
                   </p>
                 </div>
 
-                {/* Metadata */}
+                {/* Enhanced Metadata */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Metadata</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">NFT Properties</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-blue-50 rounded-xl p-4 text-center">
+                      <div className="text-2xl mb-2">{energyIcons[nft.nftType.energyType]}</div>
+                      <div className="text-sm font-semibold text-blue-900">{nft.nftType.energyType}</div>
+                      <div className="text-xs text-blue-600">Energy Type</div>
+                    </div>
+                    <div className="bg-green-50 rounded-xl p-4 text-center">
+                      <div className="text-2xl mb-2">🇨🇭</div>
+                      <div className="text-sm font-semibold text-green-900">Swiss</div>
+                      <div className="text-xs text-green-600">Quality</div>
+                    </div>
+                  </div>
+                  
                   <div className="space-y-2">
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="text-gray-600">Energy Type</span>
-                      <span className="font-medium">{nft.nftType.energyType}</span>
+                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600 font-medium">Token ID</span>
+                      <span className="font-bold text-gray-900">#{nft.tokenId.toString()}</span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="text-gray-600">Rarity</span>
-                      <span className="font-medium">{nft.nftType.rarity}</span>
+                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600 font-medium">Energy Type</span>
+                      <span className="font-semibold text-gray-900">{nft.nftType.energyType}</span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="text-gray-600">Quantity</span>
-                      <span className="font-medium">{nft.quantity}</span>
+                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600 font-medium">Rarity</span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${rarityColors[nft.nftType.rarity]}`}>
+                        {nft.nftType.rarity}
+                      </span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="text-gray-600">Last Updated</span>
-                      <span className="font-medium">{nft.lastUpdated.toLocaleDateString()}</span>
+                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600 font-medium">Quantity Owned</span>
+                      <span className="font-bold text-gray-900">×{nft.quantity}</span>
+                    </div>
+                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600 font-medium">Last Updated</span>
+                      <span className="font-medium text-gray-900">{nft.lastUpdated.toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between py-3 px-4 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600 font-medium">Collection</span>
+                      <span className="font-semibold text-gray-900">Energy Quest Series</span>
                     </div>
                   </div>
                 </div>
 
-                              {/* Contract Information Cards */}
+                {/* Contract Information Cards */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Contract Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -321,9 +336,8 @@ export function NFTDetailModal({ nft, isOpen, onClose }: NFTDetailModalProps) {
                 )}
               </div>
             </div>
-          </motion.div>
         </motion.div>
-      )}
-    </AnimatePresence>
+      </DialogContent>
+    </Dialog>
   )
 } 

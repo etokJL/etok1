@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode } from 'react'
+import { type ReactNode, useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
 import { config } from '@/lib/wagmi'
@@ -36,6 +36,18 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
+  // Force theme to 'marine' and persist it
+  useEffect(() => {
+    try {
+      document.documentElement.setAttribute('data-theme', 'marine')
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('theme', 'marine')
+      }
+    } catch {
+      // noop
+    }
+  }, [])
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>

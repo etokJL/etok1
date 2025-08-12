@@ -13,6 +13,17 @@ npm run monitor
 # Option 3: Direkt
 node monitor.js
 ```
+### **macOS: Services in separaten Terminal-Fenstern + zentraler Monitor**
+```bash
+# Startet Hardhat, Backend und Frontend jeweils in eigenem Terminal-Fenster
+# und startet den zentralen Monitor im aktuellen Terminal (Monitor-only)
+./start-system.sh
+```
+
+Hinweis:
+- Der zentrale Monitor läuft in "monitor-only"-Modus (startet keine Prozesse, überwacht nur)
+- Die Services bleiben in ihren Fenstern sichtbar und laufen unabhängig weiter
+
 
 ---
 

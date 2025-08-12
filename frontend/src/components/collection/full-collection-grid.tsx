@@ -224,7 +224,7 @@ export function FullCollectionGrid({ nfts, onNFTSelect, onCreatePlant }: FullCol
       {/* NFT Grid */}
       <motion.div
         className={viewMode === 'grid' 
-          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4' 
+          ? 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10 gap-4' 
           : 'grid grid-cols-1 gap-4'
         }
         variants={containerVariants}

@@ -119,9 +119,9 @@ export function SimpleGrid({ nfts, onNFTSelect, onCreatePlant }: SimpleGridProps
   // Get grid classes based on view mode
   const getGridClasses = () => {
     if (viewMode === 'grid') {
-      return 'nft-grid-mobile'
+      return 'grid gap-3 grid-cols-[repeat(auto-fit,minmax(180px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] md:grid-cols-[repeat(auto-fit,minmax(220px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(220px,1fr))] xl:grid-cols-[repeat(auto-fit,minmax(240px,1fr))]'
     }
-    return 'nft-list'
+    return 'grid grid-cols-1 gap-3'
   }
 
   return (

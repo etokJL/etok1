@@ -13,6 +13,8 @@ export interface UserNFT {
   quantity: number
   isSelected?: boolean
   lastUpdated: Date
+  originalTokenId?: string // For mapping back to backend tokens
+  uniqueId?: string // Unique ID for React keys
 }
 
 export interface PlantNFT {
