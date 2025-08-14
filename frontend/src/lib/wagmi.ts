@@ -2,11 +2,27 @@ import { createConfig, http } from 'wagmi'
 import { mainnet, sepolia, polygon, arbitrum, base } from 'wagmi/chains'
 import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors'
 
+// Define local Polygon-like chain
+const localhost = {
+  id: 31337,
+  name: 'Polygon Local',
+  network: 'polygon-local',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'MATIC',
+    symbol: 'MATIC',
+  },
+  rpcUrls: {
+    public: { http: ['http://127.0.0.1:8545'] },
+    default: { http: ['http://127.0.0.1:8545'] },
+  },
+} as const
+
 // WalletConnect Project ID - replace with your actual project ID
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 
 // Define the chains we want to support
-const chains = [mainnet, sepolia, polygon, arbitrum, base] as const
+const chains = [localhost, polygon, mainnet, sepolia, arbitrum, base] as const
 
 // Create connectors array conditionally
 const createConnectors = () => {
@@ -52,6 +68,7 @@ export const config = createConfig({
   connectors: createConnectors(),
   
   transports: {
+    [localhost.id]: http(),
     [mainnet.id]: http(),
     [sepolia.id]: http(),
     [polygon.id]: http(),

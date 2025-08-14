@@ -33,11 +33,11 @@ async function main() {
   const contractData = {
     QuestNFT: {
       address: questNFTAddress,
-      abi: QuestNFT.interface.format('json')
+      abi: JSON.parse(QuestNFT.interface.formatJson())
     },
     PlantToken: {
       address: plantTokenAddress,
-      abi: PlantToken.interface.format('json')
+      abi: JSON.parse(PlantToken.interface.formatJson())
     }
   };
 

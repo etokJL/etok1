@@ -45,19 +45,40 @@ contract QuestNFT is ERC721A, Ownable {
     }
     
     /**
+     * @dev Create a custom package with specific NFT types (for airdrops)
+     */
+    function createCustomPackage(uint256[] memory nftTypes) external onlyOwner returns (uint256) {
+        require(nftTypes.length > 0, "Empty NFT types array");
+        require(nftTypes.length <= NFTS_PER_PACKAGE, "Too many NFT types");
+        
+        // Validate NFT types
+        for (uint256 i = 0; i < nftTypes.length; i++) {
+            require(nftTypes[i] >= 1 && nftTypes[i] <= TOTAL_NFT_TYPES, "Invalid NFT type");
+        }
+        
+        packageContents[currentPackageId] = nftTypes;
+        emit PackageCreated(currentPackageId, nftTypes);
+        
+        uint256 packageId = currentPackageId;
+        currentPackageId++;
+        return packageId;
+    }
+    
+    /**
      * @dev Purchase a package (in real app would handle payment)
      */
     function purchasePackage(uint256 packageId) external {
         require(packageId < currentPackageId, "Package does not exist");
         
         uint256[] memory nftTypes = packageContents[packageId];
+        require(nftTypes.length > 0, "Empty package");
         
-        // Mint 5 NFTs in one transaction using ERC721A
+        // Mint the actual number of NFTs in the package (not always 5)
         uint256 startTokenId = _nextTokenId();
-        _mint(msg.sender, NFTS_PER_PACKAGE);
+        _mint(msg.sender, nftTypes.length);
         
         // Assign NFT types to the minted tokens
-        for (uint256 i = 0; i < NFTS_PER_PACKAGE; i++) {
+        for (uint256 i = 0; i < nftTypes.length; i++) {
             uint256 tokenId = startTokenId + i;
             _nftTypes[tokenId] = nftTypes[i];
         }

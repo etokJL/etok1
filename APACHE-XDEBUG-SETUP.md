@@ -361,3 +361,4 @@ API:         http://127.0.0.1:8282/api/v1/stats
 
 **🎉 Ihr lokaler Apache-Server mit XDebug ist jetzt einsatzbereit für das Booster NFT dApp Projekt!**
 
+

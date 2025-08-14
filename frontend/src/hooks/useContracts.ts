@@ -1,6 +1,9 @@
 import { useAccount } from 'wagmi'
 import { useCallback, useState } from 'react'
-import { CONTRACT_CONFIG, GAS_LIMITS, CONTRACT_ERRORS } from '@/lib/contracts'
+import { writeContract, waitForTransactionReceipt } from 'wagmi/actions'
+
+import { config } from '@/lib/wagmi'
+import contracts from '@/contracts.json'
 import { formatEther } from 'viem'
 
 // Hook for QuestNFT contract interactions
@@ -35,7 +38,7 @@ export function useQuestNFT() {
   }, [address])
 
   // Get NFT details
-  const getNFTDetails = useCallback(async (tokenId: bigint) => {
+  const getNFTDetails = useCallback(async (_tokenId: bigint) => {
     try {
       // This would be implemented with actual contract call
       return null
@@ -66,29 +69,76 @@ export function usePlantToken() {
   // Mock data for demonstration
   const userPlants = [BigInt(1), BigInt(2)] // Mock plant token IDs
 
-  // Create plant function
-  const handleCreatePlant = useCallback(async (nftTokenIds: bigint[], plantTypeId: bigint) => {
+  // Create plant function (by name on contract)
+  const handleCreatePlant = useCallback(async (plantName: string) => {
+    console.log('🔗 handleCreatePlant called with:', plantName)
+    console.log('Address:', address)
+    console.log('Contract address:', contracts.PlantToken.address)
+    
     if (!address) {
+      console.error('❌ Wallet not connected')
       setError('Wallet not connected')
       return
     }
 
+    console.log('⏳ Starting plant creation...')
     setIsLoading(true)
     setError(null)
 
     try {
-      // Simulate contract interaction
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      console.log('Plant created successfully')
+      console.log('📝 MINIMAL TEST APPROACH')
+      console.log('========================')
+      console.log('PlantToken address:', contracts.PlantToken.address)
+      console.log('PlantName argument:', plantName)
+      console.log('User address:', address)
+      
+      // Debug: Log ABI to see what we're working with
+      console.log('Contract ABI type:', typeof contracts.PlantToken.abi)
+      console.log('First ABI entry:', contracts.PlantToken.abi[0])
+      
+      // Find the createPlant function in ABI
+      const createPlantABI = contracts.PlantToken.abi.find(
+        (item: any) => item.type === 'function' && item.name === 'createPlant'
+      )
+      console.log('CreatePlant ABI:', createPlantABI)
+      
+      console.log('🚀 Attempting writeContract...')
+      const hash = await writeContract(config, {
+        address: contracts.PlantToken.address as `0x${string}`,
+        abi: contracts.PlantToken.abi,
+        functionName: 'createPlant',
+        args: [plantName],
+      })
+
+      console.log('🔍 Transaction hash:', hash)
+      console.log('⏳ Waiting for transaction receipt...')
+      
+      await waitForTransactionReceipt(config, { hash })
+      console.log('✅ Plant created on-chain with name:', plantName)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create plant')
+      console.error('❌ Contract call failed:', err)
+      console.error('Error details:', {
+        name: err instanceof Error ? err.name : 'Unknown',
+        message: err instanceof Error ? err.message : String(err),
+        cause: err instanceof Error ? err.cause : undefined,
+        stack: err instanceof Error ? err.stack : undefined
+      })
+      
+      const message = err instanceof Error
+        ? (typeof (err as unknown as { shortMessage?: string }).shortMessage === 'string'
+            ? (err as unknown as { shortMessage: string }).shortMessage
+            : err.message)
+        : 'Failed to create plant'
+      setError(message)
+      console.error('🚨 Setting error:', message)
     } finally {
+      console.log('🏁 Plant creation finished, setting loading to false')
       setIsLoading(false)
     }
   }, [address])
 
   // Load sub-units function
-  const handleLoadSubUnits = useCallback(async (tokenId: bigint, amount: bigint) => {
+  const handleLoadSubUnits = useCallback(async (_tokenId: bigint, _amount: bigint) => {
     if (!address) {
       setError('Wallet not connected')
       return
@@ -109,7 +159,7 @@ export function usePlantToken() {
   }, [address])
 
   // Unload sub-units function
-  const handleUnloadSubUnits = useCallback(async (tokenId: bigint, amount: bigint) => {
+  const handleUnloadSubUnits = useCallback(async (_tokenId: bigint, _amount: bigint) => {
     if (!address) {
       setError('Wallet not connected')
       return

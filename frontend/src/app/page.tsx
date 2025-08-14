@@ -9,11 +9,13 @@ import { TokenDetailModal } from '@/components/cards/token-detail-modal'
 import { AppNavigation } from '@/components/navigation/app-navigation'
 import { TradingInterface } from '@/components/trading/trading-interface'
 import { useContracts } from '@/hooks/useContracts'
+import { useBlockchainNFTData, useBlockchainPlantData, useCanCreatePlant } from '@/hooks/useBlockchainData'
 import { useAutoConnect } from '@/hooks/useAutoConnect'
 import { AnimationQueueManager } from '@/components/animations/animation-queue-manager'
 import { PageTemplate } from '@/components/layout/page-template'
 import { PageHeader } from '@/components/layout/page-header'
 import { clientSessionAPI } from '@/lib/clientSessionAPI'
+import { PlantCreationPanel } from '@/components/plants/plant-creation-panel'
 // import type { UserNFT } from '@/types/nft'
 
 
@@ -25,14 +27,22 @@ export default function SimplePage() {
   const { questNFT, plantToken } = useContracts()
   
   const [activeTab, setActiveTab] = useState('collection')
+  // On-Chain Daten Hooks
+  const blockchainNFTData = useBlockchainNFTData()
+  const blockchainPlantData = useBlockchainPlantData()
+  // canCreatePlant wird in PlantCreationPanel direkt abgefragt
+  
+  // Legacy state für Kompatibilität mit bestehenden Components
   const [tokens, setTokens] = useState<BackendToken[]>([])
-  const [totalNFTs, setTotalNFTs] = useState(0)
-  const [uniqueTypes, setUniqueTypes] = useState(0)
-  const [plantsCreated, setPlantsCreated] = useState(0)
+  
+  // On-Chain Daten als primäre Quelle
+  const totalNFTs = blockchainNFTData.totalNFTs
+  const uniqueTypes = blockchainNFTData.uniqueTypes  
+  const plantsCreated = blockchainPlantData.plantsCreated
   const [selectedToken, setSelectedToken] = useState<BackendToken | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isLoadingTokens, setIsLoadingTokens] = useState(false)
+  // const [isLoadingTokens, setIsLoadingTokens] = useState(false)
   const hasFetchedOnceRef = useRef(false)
 
 
@@ -81,71 +91,40 @@ export default function SimplePage() {
     return images[(id - 1) % images.length]
   }, [])
 
-  const setDemoData = useCallback(() => {
-    // Demo NFT Tokens erstellen
-    const nowIso = new Date().toISOString()
-    const demoTokens: BackendToken[] = [
-      { id: 1, contract_address: '0x0000000000000000000000000000000000000000', owner_address: '0x0000000000000000000000000000000000000000', token_id: '1', name: 'Solar Panel', token_type: 'erc1155', created_at: nowIso, updated_at: nowIso },
-      { id: 2, contract_address: '0x0000000000000000000000000000000000000000', owner_address: '0x0000000000000000000000000000000000000000', token_id: '2', name: 'Home Battery', token_type: 'erc1155', created_at: nowIso, updated_at: nowIso },
-      { id: 3, contract_address: '0x0000000000000000000000000000000000000000', owner_address: '0x0000000000000000000000000000000000000000', token_id: '3', name: 'Smart Home System', token_type: 'erc1155', created_at: nowIso, updated_at: nowIso },
-      { id: 4, contract_address: '0x0000000000000000000000000000000000000000', owner_address: '0x0000000000000000000000000000000000000000', token_id: '4', name: 'E-Car Charging', token_type: 'erc1155', created_at: nowIso, updated_at: nowIso },
-      { id: 5, contract_address: '0x0000000000000000000000000000000000000000', owner_address: '0x0000000000000000000000000000000000000000', token_id: '5', name: 'Smart Meter', token_type: 'erc1155', created_at: nowIso, updated_at: nowIso },
-      { id: 6, contract_address: '0x0000000000000000000000000000000000000000', owner_address: '0x0000000000000000000000000000000000000000', token_id: '6', name: 'Heat Pump', token_type: 'erc1155', created_at: nowIso, updated_at: nowIso },
-      { id: 7, contract_address: '0x0000000000000000000000000000000000000000', owner_address: '0x0000000000000000000000000000000000000000', token_id: '7', name: 'E-Bike Battery', token_type: 'erc1155', created_at: nowIso, updated_at: nowIso },
-      { id: 8, contract_address: '0x0000000000000000000000000000000000000000', owner_address: '0x0000000000000000000000000000000000000000', token_id: '8', name: 'Wind Turbine', token_type: 'erc1155', created_at: nowIso, updated_at: nowIso }
-    ]
-    
-    setTokens(demoTokens)
-    setTotalNFTs(demoTokens.length)
-    setUniqueTypes(demoTokens.length)
-    setPlantsCreated(2)
-    // Demo-Daten werden nur noch ohne Wallet-Verbindung angezeigt
-  }, [])
 
+
+  // Konvertiere On-Chain NFTs zu Legacy-Format für bestehende UI-Components
   useEffect(() => {
-    // Nur Demo-Daten zeigen, wenn Auto-Connect bereits versucht wurde
-    if (!isConnected && hasAttempted) {
-      setDemoData()
-    }
-  }, [isConnected, hasAttempted, setDemoData])
-
-  const fetchBackendData = useCallback(async () => {
-    if (!address) return
-    
-    try {
-      setIsLoadingTokens(true)
-      const response = await fetch(`http://127.0.0.1:8282/api/v1/users/${address}/tokens`)
+    if (isConnected && blockchainNFTData.nfts.length > 0) {
+      console.log('🔗 Converting on-chain NFTs to display format...')
       
-      if (response.ok) {
-        // Read once; try to parse JSON. If HTML, show snippet.
-        const raw = await response.text()
-        try {
-          const tokens: BackendToken[] = JSON.parse(raw)
-          setTotalNFTs(tokens.length)
-          const uniqueNames = new Set(tokens.map(token => token.name))
-          setUniqueTypes(uniqueNames.size)
-          const plantTokens = tokens.filter(token => token.token_type === 'erc1155')
-          setPlantsCreated(plantTokens.length)
-          setTokens(tokens)
-          setErrorMessage(null)
-        } catch {
-          console.error('Backend returned non-JSON response:', raw.slice(0, 200))
-          setTokens([])
-          setErrorMessage('Backend lieferte keine gültige JSON-Antwort (evtl. HTML/Notice).')
-        }
-      } else {
-        console.error('Backend API failed with status:', response.status)
-        setTokens([])
-        setErrorMessage(`Backend-Fehler: HTTP ${response.status}`)
-      }
-    } catch (error) {
-      console.error('Error fetching backend data:', error)
+      const nowIso = new Date().toISOString()
+      const convertedTokens: BackendToken[] = blockchainNFTData.nfts.map((nft, index) => ({
+        id: index + 1,
+        contract_address: '0x5FbDB2315678afecb367f032d93F642f64180aa3', // NEW QuestNFT contract
+        owner_address: address || '',
+        token_id: nft.tokenId,
+        name: nft.name,
+        token_type: 'erc721',
+        created_at: nowIso,
+        updated_at: nowIso,
+      }))
+      
+      setTokens(convertedTokens)
+      console.log(`✅ Converted ${convertedTokens.length} on-chain NFTs for display`)
+    } else if (!isConnected) {
+      // Wenn nicht verbunden, zeige leere Liste (keine Mock-Daten mehr)
       setTokens([])
-      setErrorMessage('Fehler beim Laden der Daten. Bitte Backend prüfen oder später erneut versuchen.')
-    } finally {
-      setIsLoadingTokens(false)
+      console.log('❌ Not connected - showing empty token list')
     }
-  }, [address, setDemoData])
+  }, [isConnected, address, blockchainNFTData.nfts])
+
+  // Backend-Fetch entfernt - verwende nur On-Chain Daten
+  const refreshData = useCallback(async () => {
+    console.log('🔄 Refreshing on-chain data...')
+    blockchainNFTData.refresh()
+    blockchainPlantData.refresh()
+  }, [blockchainNFTData, blockchainPlantData])
 
   // Zentrale NFT-Transformation - nur einmal definiert
   const transformedNFTs = useMemo(() => {
@@ -187,37 +166,13 @@ export default function SimplePage() {
     if (isConnected && address && !hasFetchedOnceRef.current) {
       hasFetchedOnceRef.current = true
       console.log('🔗 Attempting to connect to backend...')
-      fetchBackendData()
+      refreshData()
       // Session init (non-blocking)
       clientSessionAPI
         .initSession(address)
         .catch(error => console.log('💾 Session init skipped:', error.message))
     }
-  }, [isConnected, address, fetchBackendData])
-
-  // Auto refresh tokens periodically while connected
-  useEffect(() => {
-    if (!(isConnected && address)) return
-    const interval = setInterval(() => {
-      fetchBackendData()
-    }, 10000)
-    return () => clearInterval(interval)
-  }, [isConnected, address, fetchBackendData])
-
-  // Refresh when window regains focus
-  useEffect(() => {
-    if (!(isConnected && address)) return
-    const onFocus = () => fetchBackendData()
-    window.addEventListener('focus', onFocus)
-    return () => window.removeEventListener('focus', onFocus)
-  }, [isConnected, address, fetchBackendData])
-
-  // Refresh when user navigates back to collection tab
-  useEffect(() => {
-    if (activeTab === 'collection' && isConnected && address) {
-      fetchBackendData()
-    }
-  }, [activeTab, isConnected, address, fetchBackendData])
+  }, [isConnected, address, refreshData])
 
   const pageVariants = {
     initial: { opacity: 0, y: 20 },
@@ -342,25 +297,23 @@ export default function SimplePage() {
               Powered by Swiss Technology ⚡
             </motion.div>
 
-            {/* Manual connect fallback button */}
+            {/* Skip Button after 2 seconds */}
             <motion.button
               className="text-primary hover:text-foreground text-sm font-medium transition-colors"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
+              transition={{ delay: 2 }}
               onClick={() => {
-                try {
-                  localStorage.setItem('skipAutoConnect', 'true')
-                } catch {}
+                // Force stop auto-connect and show manual connection
+                localStorage.setItem('skipAutoConnect', 'true')
                 window.location.reload()
               }}
-              type="button"
             >
               Connect manually instead →
             </motion.button>
           </div>
         </div>
-       ) : !isConnected ? (
+      ) : !isConnected ? (
         /* Fallback manual connection if auto-connect fails */
         <div className="flex items-center justify-center min-h-screen bg-secondary">
           <div className="text-center max-w-md mx-auto">
@@ -375,7 +328,7 @@ export default function SimplePage() {
             <h1 className="text-2xl font-bold text-foreground mb-4">Connect Your Wallet</h1>
             <p className="text-muted-foreground mb-8">Choose your preferred wallet to access your Swiss Energy NFT Collection</p>
             
-             <div className="space-y-3">
+            <div className="space-y-3">
               {connectors.slice(0, 3).map((connector) => (
                 <motion.button
                   key={connector.uid}
@@ -440,7 +393,7 @@ export default function SimplePage() {
                 >
                   <TradingInterface
                     userTokens={tokens}
-                    onTradeComplete={fetchBackendData}
+                    onTradeComplete={refreshData}
                   />
                 </motion.div>
               )}
@@ -452,19 +405,25 @@ export default function SimplePage() {
                   exit={{ opacity: 0, x: -20 }}
                   className="p-4"
                 >
-                  <div className="text-center py-8">
-                    <div className="text-4xl mb-4">🌱</div>
-                    <h2 className="text-xl font-semibold mb-2">Energy Plants</h2>
-                    <p className="text-gray-600">Create and manage your energy plants</p>
-                    <button 
-                      className="btn btn-primary mt-4"
-                      onClick={() => plantToken.createPlant([BigInt(1), BigInt(2), BigInt(3)], BigInt(1000))}
-                      disabled={plantToken.isLoading}
-                      type="button"
-                    >
-                      {plantToken.isLoading ? 'Creating...' : 'Create Energy Plant'}
-                    </button>
-                  </div>
+                  <PlantCreationPanel
+                    questNFTs={transformedNFTs}
+                    isCreating={plantToken.isLoading}
+                    onCreate={async (plantName) => {
+                      console.log('📱 App.tsx onCreate called with:', plantName)
+                      console.log('plantToken.isLoading:', plantToken.isLoading)
+                      console.log('plantToken.error:', plantToken.error)
+                      
+                      try {
+                        console.log('🚀 Calling plantToken.createPlant...')
+                        await plantToken.createPlant(plantName)
+                        console.log('✅ createPlant completed, refreshing data...')
+                        await refreshData()
+                        console.log('✅ Backend data refreshed')
+                      } catch (error) {
+                        console.error('❌ Error in onCreate:', error)
+                      }
+                    }}
+                  />
                 </motion.div>
               )}
               {activeTab === 'quests' && (
@@ -495,28 +454,19 @@ export default function SimplePage() {
           </main>
         </div>
       )}
-      {showDetailModal && selectedToken && (
-        <TokenDetailModal
-          token={selectedToken}
-          isOpen={showDetailModal}
-          onClose={handleCloseDetailModal}
-        />
-      )}
+      <TokenDetailModal
+        token={selectedToken}
+        isOpen={showDetailModal}
+        onClose={handleCloseDetailModal}
+      />
       
       {/* Animation Queue Manager */}
       {isConnected && address && (
         <AnimationQueueManager
           nfts={transformedNFTs}
           walletAddress={address}
-          isVisible={activeTab === 'collection'}
-          onPendingAnimationsDetected={() => {
-            // If user is not on collection, switch to collection to show new animations
-            if (activeTab !== 'collection') setActiveTab('collection')
-          }}
           onAnimationComplete={(animation) => {
             console.log('Animation completed:', animation.type, animation.nft.nftType.name)
-            // After an animation completes, refresh tokens to reflect state changes
-            fetchBackendData()
           }}
         />
       )}
