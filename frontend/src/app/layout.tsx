@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './simple-globals.css'
 import { Providers } from '@/components/providers'
+import { Navigation } from '@/components/layout/navigation'
+import { ChatWidget } from '@/components/chat/chat-widget'
 import { APP_NAME, APP_DESCRIPTION } from '@/lib/constants'
 
 const inter = Inter({ 
@@ -84,9 +86,11 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased overflow-x-hidden overflow-y-auto">
         <Providers>
           <div className="relative flex min-h-screen flex-col">
+            <Navigation />
             <main className="flex-1">
               {children}
             </main>
+            <ChatWidget />
           </div>
         </Providers>
       </body>

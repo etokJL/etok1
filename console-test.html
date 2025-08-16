@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blockchain Console Test</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+</head>
+<body>
+    <h1>🔧 Blockchain Console Test</h1>
+    <div id="output"></div>
+
+    <script>
+        const targetAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+        const questNFTAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        
+        // ABI for balanceOf function
+        const questNFTABI = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function getUserNFTCounts(address user) view returns (uint256[])",
+            "function canCreatePlant(address user) view returns (bool)",
+            "function name() view returns (string)"
+        ];
+
+        const log = (message) => {
+            console.log(message);
+            document.getElementById('output').innerHTML += message + '<br>';
+        };
+
+        async function testBlockchain() {
+            try {
+                log(`🎯 Testing blockchain data for: ${targetAddress}`);
+                log(`📋 QuestNFT Contract: ${questNFTAddress}`);
+                
+                // Connect to local provider
+                const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545');
+                log('✅ Connected to local provider');
+                
+                // Test basic connectivity
+                const network = await provider.getNetwork();
+                log(`🌐 Network: ${network.name} (Chain ID: ${network.chainId})`);
+                
+                const blockNumber = await provider.getBlockNumber();
+                log(`📦 Current Block: ${blockNumber}`);
+                
+                // Create contract instance
+                const questNFT = new ethers.Contract(questNFTAddress, questNFTABI, provider);
+                log('📄 Contract instance created');
+                
+                // Test contract name first
+                try {
+                    const contractName = await questNFT.name();
+                    log(`📝 Contract Name: ${contractName}`);
+                } catch (error) {
+                    log(`❌ Contract Name Error: ${error.message}`);
+                }
+                
+                // Test balance
+                try {
+                    const balance = await questNFT.balanceOf(targetAddress);
+                    log(`💰 NFT Balance: ${balance.toString()}`);
+                    
+                    if (balance.gt(0)) {
+                        // Get NFT counts by type
+                        const nftCounts = await questNFT.getUserNFTCounts(targetAddress);
+                        log(`📊 NFT Counts: [${nftCounts.map(c => c.toString()).join(', ')}]`);
+                        
+                        // Check plant creation eligibility
+                        const canCreate = await questNFT.canCreatePlant(targetAddress);
+                        log(`🌱 Can Create Plant: ${canCreate}`);
+                        
+                        // Calculate unique types
+                        const uniqueTypes = nftCounts.filter(count => count.gt(0)).length;
+                        log(`🎨 Unique Types: ${uniqueTypes}`);
+                        
+                        log(`✅ SUCCESS: Found ${balance} NFTs for address!`);
+                    } else {
+                        log(`⚠️ No NFTs found for this address`);
+                    }
+                    
+                } catch (error) {
+                    log(`❌ Balance Error: ${error.message}`);
+                }
+                
+            } catch (error) {
+                log(`❌ Test Failed: ${error.message}`);
+            }
+        }
+
+        // Auto-run test
+        window.onload = () => {
+            log('🚀 Starting blockchain test...');
+            testBlockchain();
+        };
+        
+        // Make functions globally available for manual testing
+        window.testBlockchain = testBlockchain;
+        window.targetAddress = targetAddress;
+        window.questNFTAddress = questNFTAddress;
+    </script>
+</body>
+</html>

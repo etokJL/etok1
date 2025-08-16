@@ -1,0 +1,84 @@
+services:
+  zulip:
+    image: zulip/docker-zulip:latest
+    container_name: zulip-server
+    ports:
+      - "9090:80"
+      - "9443:443"
+    environment:
+      # Basic configuration
+      SETTING_EXTERNAL_HOST: "localhost:9090"
+      SETTING_ZULIP_ADMINISTRATOR: "admin@booster.energy"
+      
+      # Database settings
+      SETTING_MEMCACHED_LOCATION: "memcached:11211"
+      SETTING_RABBITMQ_HOST: "rabbitmq"
+      SETTING_REDIS_HOST: "redis"
+      
+      # Email settings (for development)
+      SETTING_EMAIL_HOST: ""
+      SETTING_EMAIL_HOST_USER: ""
+      SETTING_EMAIL_PORT: "587"
+      SETTING_EMAIL_USE_TLS: "true"
+      
+      # Security settings
+      SECRETS_secret_key: "your-secret-key-here-change-this-in-production"
+      SETTING_SECURE_SSL_REDIRECT: "false"
+      
+      # Chat settings
+      SETTING_ENABLE_GUEST_USER_ACCESS: "true"
+      SETTING_WILDCARD_MENTION_POLICY: "1"
+      SETTING_REALM_NAME: "Booster Energy Chat"
+      SETTING_REALM_DESCRIPTION: "Community chat for Booster Energy NFT platform"
+      
+      # API settings
+      SETTING_CROSS_REALM_BOT_EMAILS: "bot@booster.energy"
+      
+    volumes:
+      - zulip-data:/data
+      - ./zulip-logs:/var/log/zulip
+    depends_on:
+      - memcached
+      - rabbitmq
+      - redis
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:13
+    container_name: zulip-postgres
+    environment:
+      POSTGRES_DB: zulip
+      POSTGRES_USER: zulip
+      POSTGRES_PASSWORD: zulip_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  memcached:
+    image: memcached:alpine
+    container_name: zulip-memcached
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.9-management-alpine
+    container_name: zulip-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: zulip
+      RABBITMQ_DEFAULT_PASS: zulip_password
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: zulip-redis
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  zulip-data:
+  postgres-data:
+  rabbitmq-data:
+  redis-data:

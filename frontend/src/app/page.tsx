@@ -2,10 +2,10 @@
 
 import { useAccount, useConnect } from 'wagmi'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import type { BackendToken } from '@/types'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+
 import { ResponsiveGridWithDetail } from '@/components/collection/responsive-grid-with-detail'
-import { TokenDetailModal } from '@/components/cards/token-detail-modal'
+
 import { AppNavigation } from '@/components/navigation/app-navigation'
 import { TradingInterface } from '@/components/trading/trading-interface'
 import { useContracts } from '@/hooks/useContracts'
@@ -14,7 +14,7 @@ import { useAutoConnect } from '@/hooks/useAutoConnect'
 import { AnimationQueueManager } from '@/components/animations/animation-queue-manager'
 import { PageTemplate } from '@/components/layout/page-template'
 import { PageHeader } from '@/components/layout/page-header'
-import { clientSessionAPI } from '@/lib/clientSessionAPI'
+
 import { PlantCreationPanel } from '@/components/plants/plant-creation-panel'
 // import type { UserNFT } from '@/types/nft'
 
@@ -32,145 +32,51 @@ export default function SimplePage() {
   const blockchainPlantData = useBlockchainPlantData()
   // canCreatePlant wird in PlantCreationPanel direkt abgefragt
   
-  // Legacy state für Kompatibilität mit bestehenden Components
-  const [tokens, setTokens] = useState<BackendToken[]>([])
-  
-  // On-Chain Daten als primäre Quelle
+  // Pure On-Chain Daten - keine Legacy States
   const totalNFTs = blockchainNFTData.totalNFTs
   const uniqueTypes = blockchainNFTData.uniqueTypes  
   const plantsCreated = blockchainPlantData.plantsCreated
-  const [selectedToken, setSelectedToken] = useState<BackendToken | null>(null)
-  const [showDetailModal, setShowDetailModal] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  // const [isLoadingTokens, setIsLoadingTokens] = useState(false)
-  const hasFetchedOnceRef = useRef(false)
 
 
 
-  const getRarityForNFT = useCallback((): string => {
-    // Simplified rarity calculation for now
-    return 'Rare'
-  }, [])
-
-  const getEnergyTypeFromName = useCallback((name: string): string => {
-    const lowerName = name.toLowerCase()
-    if (lowerName.includes('solar') || lowerName.includes('panel')) return 'Solar'
-    if (lowerName.includes('wind') || lowerName.includes('turbine')) return 'Wind'
-    if (lowerName.includes('hydro') || lowerName.includes('water')) return 'Hydro'
-    if (lowerName.includes('battery') || lowerName.includes('storage')) return 'Storage'
-    if (lowerName.includes('smart') || lowerName.includes('home') || lowerName.includes('meter')) return 'Smart'
-    if (lowerName.includes('car') || lowerName.includes('bike') || lowerName.includes('transport')) return 'Transport'
-    return 'Solar' // Default
-  }, [])
-
-  const getImageForToken = useCallback((name: string, id: number): string => {
-    const lowerName = name.toLowerCase()
-    if (lowerName.includes('solar') || lowerName.includes('panel')) return 'solar-panel.png'
-    if (lowerName.includes('wind') || lowerName.includes('turbine')) return 'smart-home.png'
-    if (lowerName.includes('battery') || lowerName.includes('home')) return 'home-battery.png'
-    if (lowerName.includes('smart') && lowerName.includes('home')) return 'smart-home.png'
-    if (lowerName.includes('smart') && lowerName.includes('meter')) return 'smart-meter.png'
-    if (lowerName.includes('smartphone')) return 'smartphone.png'
-    if (lowerName.includes('power') && lowerName.includes('bank')) return 'power-bank.png'
-    if (lowerName.includes('car') || lowerName.includes('e-car')) return 'e-car.png'
-    if (lowerName.includes('bike') || lowerName.includes('e-bike')) return 'e-bike.png'
-    if (lowerName.includes('scooter') || lowerName.includes('e-scooter')) return 'e-scooter.png'
-    if (lowerName.includes('roller') || lowerName.includes('e-roller')) return 'e-roller.png'
-    if (lowerName.includes('heat') || lowerName.includes('pump')) return 'heat-pump.png'
-    if (lowerName.includes('boiler')) return 'electric-boiler.png'
-    if (lowerName.includes('charging') || lowerName.includes('station')) return 'charging-station.png'
-    if (lowerName.includes('controller')) return 'charge-controller.png'
-    if (lowerName.includes('inverter')) return 'solar-inverter.png'
-    // Default fallback based on ID
-    const images = [
-      'solar-panel.png', 'home-battery.png', 'smart-home.png', 'e-car.png', 
-      'smart-meter.png', 'heat-pump.png', 'e-bike.png', 'smartphone.png',
-      'power-bank.png', 'charging-station.png', 'e-scooter.png', 'e-roller.png',
-      'electric-boiler.png', 'charge-controller.png', 'solar-inverter.png'
-    ]
-    return images[(id - 1) % images.length]
-  }, [])
-
-
-
-  // Konvertiere On-Chain NFTs zu Legacy-Format für bestehende UI-Components
-  useEffect(() => {
-    if (isConnected && blockchainNFTData.nfts.length > 0) {
-      console.log('🔗 Converting on-chain NFTs to display format...')
-      
-      const nowIso = new Date().toISOString()
-      const convertedTokens: BackendToken[] = blockchainNFTData.nfts.map((nft, index) => ({
-        id: index + 1,
-        contract_address: '0x5FbDB2315678afecb367f032d93F642f64180aa3', // NEW QuestNFT contract
-        owner_address: address || '',
-        token_id: nft.tokenId,
+  // Pure blockchain data transformation to UserNFT format
+  const transformedNFTs = useMemo(() => {
+    return blockchainNFTData.nfts.map((nft) => ({
+      tokenId: BigInt(nft.tokenId.replace(/[^0-9]/g, '') || '1'),
+      nftType: {
+        id: nft.nftType,
         name: nft.name,
-        token_type: 'erc721',
-        created_at: nowIso,
-        updated_at: nowIso,
-      }))
-      
-      setTokens(convertedTokens)
-      console.log(`✅ Converted ${convertedTokens.length} on-chain NFTs for display`)
-    } else if (!isConnected) {
-      // Wenn nicht verbunden, zeige leere Liste (keine Mock-Daten mehr)
-      setTokens([])
-      console.log('❌ Not connected - showing empty token list')
-    }
-  }, [isConnected, address, blockchainNFTData.nfts])
+        description: `Swiss Energy NFT #${nft.nftType}`,
+        energyType: 'Solar' as const,
+        rarity: 'Rare' as const,
+        image: `/images/nfts/nft-${nft.nftType}.png`
+      },
+      quantity: 1,
+      lastUpdated: new Date(),
+      originalTokenId: nft.tokenId,
+      uniqueId: `blockchain-${nft.tokenId}-${nft.nftType}`
+    }))
+  }, [blockchainNFTData.nfts])
+
+
+
+  
 
   // Backend-Fetch entfernt - verwende nur On-Chain Daten
   const refreshData = useCallback(async () => {
     console.log('🔄 Refreshing on-chain data...')
     blockchainNFTData.refresh()
     blockchainPlantData.refresh()
-  }, [blockchainNFTData, blockchainPlantData])
+  }, [blockchainNFTData.refresh, blockchainPlantData.refresh])
 
-  // Zentrale NFT-Transformation - nur einmal definiert
-  const transformedNFTs = useMemo(() => {
-    return tokens.map((token, index) => {
-      const originalTokenId = String(token.token_id);
-      const displayId = index + 1;
-      // Stabiler Key basierend auf originalTokenId und index
-      const stableKey = `nft-${originalTokenId}-${index}`;
-      
-      return {
-        tokenId: BigInt(originalTokenId.replace(/[^0-9]/g, '') || (index + 1)),
-        nftType: {
-          id: displayId,
-          name: token.name || `NFT Type ${displayId}`,
-          description: `A ${token.token_type} token from Swiss Energy Collection`,
-          energyType: getEnergyTypeFromName(token.name || '') as 'Solar' | 'Wind' | 'Hydro' | 'Storage' | 'Smart' | 'Transport',
-          rarity: getRarityForNFT() as 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary',
-          image: getImageForToken(token.name || '', displayId)
-        },
-        quantity: 1,
-        lastUpdated: new Date(),
-        originalTokenId: originalTokenId,
-        uniqueId: stableKey // Stabiler Key für React
-      };
-    });
-  }, [tokens, getEnergyTypeFromName, getRarityForNFT, getImageForToken])
 
-  const handleTokenClick = useCallback((token: BackendToken) => {
-    setSelectedToken(token)
-    setShowDetailModal(true)
-  }, [])
 
-  const handleCloseDetailModal = useCallback(() => {
-    setShowDetailModal(false)
-    setSelectedToken(null)
-  }, [])
+
 
   useEffect(() => {
-    if (isConnected && address && !hasFetchedOnceRef.current) {
-      hasFetchedOnceRef.current = true
-      console.log('🔗 Attempting to connect to backend...')
+    if (isConnected && address) {
+      console.log('🔗 Wallet connected, refreshing blockchain data...')
       refreshData()
-      // Session init (non-blocking)
-      clientSessionAPI
-        .initSession(address)
-        .catch(error => console.log('💾 Session init skipped:', error.message))
     }
   }, [isConnected, address, refreshData])
 
@@ -374,12 +280,8 @@ export default function SimplePage() {
                   <ResponsiveGridWithDetail
                     nfts={transformedNFTs}
                     onNFTSelect={(nft) => {
-                      // Find token by originalTokenId or by index
-                      const token = tokens.find((t, index) => {
-                        const originalTokenId = String(t.token_id);
-                        return nft.originalTokenId === originalTokenId || nft.nftType.id === (index + 1);
-                      });
-                      if (token) handleTokenClick(token)
+                      console.log('NFT selected:', nft.nftType.name)
+                      // Pure blockchain NFT selection - no legacy token conversion needed
                     }}
                   />
                 </motion.div>
@@ -392,7 +294,7 @@ export default function SimplePage() {
                   exit={{ opacity: 0, x: -20 }}
                 >
                   <TradingInterface
-                    userTokens={tokens}
+                    userTokens={[]} // Trading disabled - pure blockchain approach
                     onTradeComplete={refreshData}
                   />
                 </motion.div>
@@ -454,11 +356,7 @@ export default function SimplePage() {
           </main>
         </div>
       )}
-      <TokenDetailModal
-        token={selectedToken}
-        isOpen={showDetailModal}
-        onClose={handleCloseDetailModal}
-      />
+
       
       {/* Animation Queue Manager */}
       {isConnected && address && (
@@ -471,12 +369,7 @@ export default function SimplePage() {
         />
       )}
 
-      {/* Fehleranzeige statt Demodaten */}
-      {errorMessage && (
-        <div className="fixed top-16 right-4 z-40 px-3 py-2 rounded-md border text-sm bg-red-50 text-red-800 border-red-200 shadow">
-          {errorMessage}
-        </div>
-      )}
+      {/* Pure blockchain error handling is done in individual components */}
     </motion.div>
   )
 }

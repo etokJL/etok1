@@ -1,44 +1,65 @@
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 
 async function main() {
-  console.log("🔍 Checking network configuration...");
+  console.log("🔧 FIXING NETWORK CONNECTION");
+  console.log("=" * 40);
   
-  // Check Hardhat network
-  const [owner] = await ethers.getSigners();
-  const network = await ethers.provider.getNetwork();
-  
-  console.log("\n🌐 HARDHAT NETWORK:");
-  console.log("Chain ID:", Number(network.chainId));
-  console.log("Network name:", network.name);
-  console.log("Owner address:", owner.address);
-  console.log("Owner balance:", ethers.formatEther(await ethers.provider.getBalance(owner.address)), "ETH");
-  
-  // Check contracts on Hardhat
-  const questNFTAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
-  const code = await ethers.provider.getCode(questNFTAddress);
-  console.log("Contract code exists:", code !== "0x");
-  
-  if (code !== "0x") {
-    const QuestNFT = await ethers.getContractAt("QuestNFT", questNFTAddress);
-    const totalPackages = await QuestNFT.getTotalPackages();
-    console.log("Contract works! Total packages:", Number(totalPackages));
-  }
-  
-  // Check if user wallet exists on Hardhat
-  const userWallet = "0xd72EF037375c455Ca30ab03D5C97173b0c06719E";
-  const userBalance = await ethers.provider.getBalance(userWallet);
-  console.log("\n👤 USER WALLET ON HARDHAT:");
-  console.log("User address:", userWallet);
-  console.log("User balance:", ethers.formatEther(userBalance), "ETH");
-  
-  if (Number(userBalance) === 0) {
-    console.log("\n❌ User wallet has 0 ETH on Hardhat!");
-    console.log("🔧 Frontend might be connected to wrong network!");
-    console.log("📝 MetaMask should be connected to:");
-    console.log("   Network: Hardhat Local");
+  try {
+    // Simple network test
+    const [deployer] = await hre.ethers.getSigners();
+    console.log(`✅ Connected to network`);
+    console.log(`   Deployer: ${deployer.address}`);
+    
+    const balance = await hre.ethers.provider.getBalance(deployer.address);
+    console.log(`   Balance: ${hre.ethers.formatEther(balance)} ETH`);
+    
+    const network = await hre.ethers.provider.getNetwork();
+    console.log(`   Network: ${network.name} (Chain ID: ${network.chainId})`);
+    
+    console.log("\n📋 CONTRACT ADDRESSES:");
+    console.log(`   QuestNFT: 0x5FbDB2315678afecb367f032d93F642f64180aa3`);
+    console.log(`   PlantToken: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`);
+    console.log(`   MockUSDT: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0`);
+    console.log(`   NFTShop: 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9`);
+    
+    console.log("\n🌐 METAMASK SETUP:");
+    console.log("   Network Name: Hardhat Local");
     console.log("   RPC URL: http://localhost:8545");
     console.log("   Chain ID: 31337");
+    console.log("   Currency: ETH");
+    
+    // Test contract connection
+    const QuestNFT = await hre.ethers.getContractFactory("QuestNFT");
+    const questNFT = QuestNFT.attach("0x5FbDB2315678afecb367f032d93F642f64180aa3");
+    
+    // Try to call a simple view function
+    const name = await questNFT.name();
+    console.log(`\n✅ Contract test successful: ${name}`);
+    
+    console.log("\n🎯 NEXT STEPS:");
+    console.log("1. Open MetaMask");
+    console.log("2. Go to Settings > Networks");
+    console.log("3. Delete old 'Hardhat Local' network if exists");
+    console.log("4. Add new network with above settings");
+    console.log("5. Import account: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80");
+    console.log("6. Switch to Hardhat Local network");
+    console.log("7. Refresh browser");
+
+  } catch (error) {
+    console.error("❌ Network Error:", error.message);
+    
+    console.log("\n🔧 TROUBLESHOOTING:");
+    console.log("1. Make sure Hardhat node is running:");
+    console.log("   npx hardhat node --port 8545");
+    console.log("2. Redeploy contracts:");
+    console.log("   npx hardhat run scripts/deploy.js --network localhost");
+    console.log("3. Reset MetaMask network connection");
   }
 }
 
-main().catch(console.error);
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

@@ -7,6 +7,8 @@ use App\Models\AppToken;
 use App\Models\Airdrop;
 use App\Http\Controllers\VisibilityController;
 use App\Http\Controllers\ClientSessionController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +23,24 @@ use App\Http\Controllers\ClientSessionController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Authentication routes (public)
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+    
+    // Password reset routes
+    Route::post('/password/reset/send', [PasswordResetController::class, 'sendResetLink']);
+    Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
+    Route::post('/password/reset/verify', [PasswordResetController::class, 'verifyToken']);
+    
+    // Protected auth routes
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/user', [AuthController::class, 'user']);
+        Route::put('/profile', [AuthController::class, 'updateProfile']);
+    });
 });
 
 // API v1 routes

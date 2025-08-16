@@ -87,11 +87,40 @@ contract QuestNFT is ERC721A, Ownable {
     }
     
     /**
+     * @dev Purchase a package for a specific user (only owner - for shop)
+     */
+    function purchasePackageFor(address user, uint256 packageId) external onlyOwner {
+        require(packageId < currentPackageId, "Package does not exist");
+        
+        uint256[] memory nftTypes = packageContents[packageId];
+        require(nftTypes.length > 0, "Empty package");
+        
+        // Mint the actual number of NFTs in the package (not always 5)
+        uint256 startTokenId = _nextTokenId();
+        _mint(user, nftTypes.length);
+        
+        // Assign NFT types to the minted tokens
+        for (uint256 i = 0; i < nftTypes.length; i++) {
+            uint256 tokenId = startTokenId + i;
+            _nftTypes[tokenId] = nftTypes[i];
+        }
+        
+        emit PackagePurchased(user, packageId, nftTypes);
+    }
+    
+    /**
      * @dev Get NFT type for a token ID
      */
     function getNFTType(uint256 tokenId) external view returns (uint256) {
         require(_exists(tokenId), "Token does not exist");
         return _nftTypes[tokenId];
+    }
+    
+    /**
+     * @dev Get next token ID (public wrapper for _nextTokenId)
+     */
+    function nextTokenId() external view returns (uint256) {
+        return _nextTokenId();
     }
     
     /**

@@ -22,6 +22,20 @@ async function main() {
   const plantTokenAddress = await plantToken.getAddress();
   console.log("PlantToken deployed to:", plantTokenAddress);
 
+  console.log("\nDeploying MockUSDT...");
+  const MockUSDT = await ethers.getContractFactory("MockUSDT");
+  const mockUSDT = await MockUSDT.deploy(deployer.address);
+  await mockUSDT.waitForDeployment();
+  const mockUSDTAddress = await mockUSDT.getAddress();
+  console.log("MockUSDT deployed to:", mockUSDTAddress);
+
+  console.log("\nDeploying NFTShop...");
+  const NFTShop = await ethers.getContractFactory("NFTShop");
+  const nftShop = await NFTShop.deploy(mockUSDTAddress, questNFTAddress, plantTokenAddress, deployer.address);
+  await nftShop.waitForDeployment();
+  const nftShopAddress = await nftShop.getAddress();
+  console.log("NFTShop deployed to:", nftShopAddress);
+
   // Create test data
   console.log("\nCreating test data...");
   for (let i = 0; i < 3; i++) {
@@ -38,6 +52,14 @@ async function main() {
     PlantToken: {
       address: plantTokenAddress,
       abi: JSON.parse(PlantToken.interface.formatJson())
+    },
+    MockUSDT: {
+      address: mockUSDTAddress,
+      abi: JSON.parse(MockUSDT.interface.formatJson())
+    },
+    NFTShop: {
+      address: nftShopAddress,
+      abi: JSON.parse(NFTShop.interface.formatJson())
     }
   };
 
@@ -48,6 +70,8 @@ async function main() {
   console.log("Contracts deployed:");
   console.log("QuestNFT:", questNFTAddress);
   console.log("PlantToken:", plantTokenAddress);
+  console.log("MockUSDT:", mockUSDTAddress);
+  console.log("NFTShop:", nftShopAddress);
   console.log("Contract addresses and ABIs saved to frontend/src/contracts.json");
 }
 

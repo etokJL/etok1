@@ -100,18 +100,8 @@ export function useBlockchainNFTData() {
           
         } catch (error) {
           console.error('❌ Error getting NFT counts from contract:', error)
-          // Fallback: create individual NFTs based on known total balance
-          // This is a simplified approach when contract calls fail
-          for (let i = 1; i <= Math.min(balance, 60); i++) {
-            const estimatedType = ((i - 1) % 15) + 1 // Cycle through types 1-15
-            detailedNFTs.push({
-              tokenId: `fallback_token_${i}`,
-              nftType: estimatedType,
-              name: nftNames[estimatedType - 1] || `NFT Type ${estimatedType}`,
-              owner: address,
-            })
-          }
-          console.log('🔄 Using fallback NFT mapping with', detailedNFTs.length, 'individual NFTs')
+          setError(`Failed to fetch NFT data from blockchain: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          return // No fallback - if blockchain fails, show empty
         }
       }
 

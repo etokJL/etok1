@@ -2,7 +2,7 @@ const { ethers } = require("hardhat");
 
 async function main() {
   // Hardcoded for testing - in production, pass via environment variables
-  const userAddress = process.env.AIRDROP_USER_ADDRESS || "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+  const userAddress = process.env.AIRDROP_USER_ADDRESS || "0xd72EF037375c455Ca30ab03D5C97173b0c06719E";
   const nftTypes = process.env.AIRDROP_NFT_TYPES ? 
     process.env.AIRDROP_NFT_TYPES.split(',').map(type => parseInt(type.trim())) : 
     [1, 2, 3, 4, 5]; // Default NFT types
