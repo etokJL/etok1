@@ -44,6 +44,32 @@ export function useShop() {
 
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [lastPurchase, setLastPurchase] = useState<{
+    type: 'package' | 'single' | 'plant'
+    items?: {
+      nftType?: number
+      nftTypes?: number[]
+      plantName?: string
+    }
+  } | null>(null)
+  
+  // Watch for transaction success to show modal
+  useEffect(() => {
+    if (isSuccess && lastPurchase && !showSuccessModal) {
+      console.log('✅ Transaction confirmed! Showing success modal')
+      setShowSuccessModal(true)
+    }
+  }, [isSuccess, lastPurchase, showSuccessModal])
+  
+  // Reset modal state when starting new transaction
+  useEffect(() => {
+    if (isPending && showSuccessModal) {
+      console.log('🔄 New transaction started, closing previous modal')
+      setShowSuccessModal(false)
+      setLastPurchase(null)
+    }
+  }, [isPending, showSuccessModal])
 
   // Read shop prices
   const { data: pricesData } = useReadContract({
@@ -167,14 +193,44 @@ export function useShop() {
         await refetchAllowance()
       }
       
-      await writeContract({
+      const result = await writeContract({
         address: contracts.NFTShop.address as `0x${string}`,
         abi: shopAbi,
         functionName: 'purchaseQuestNFTPackage',
       })
+      
+      console.log('✅ NFT Package Purchase submitted:', result)
+      
+      // Set purchase info for success modal (will show when transaction confirms)
+      setLastPurchase({
+        type: 'package',
+        items: {
+          nftTypes: [1, 2, 3, 4, 5] // Default package contents
+        }
+      })
     } catch (err) {
       console.error('Quest NFT package purchase failed:', err)
-      setError(err instanceof Error ? err.message : 'Failed to purchase Quest NFT package')
+      
+      // Check if this is just a MetaMask SDK connection error but transaction went through
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      if (errorMsg.includes('metamask-sdk.api.cx.metamask.io') || 
+          errorMsg.includes('ERR_CONNECTION_RESET') ||
+          errorMsg.includes('ERR_CONNECTION_CLOSED')) {
+        console.log('⚠️ MetaMask SDK connection error, but transaction may have succeeded')
+        console.log('Check your wallet and refresh the page to see if NFTs arrived')
+        setError('Network connection issue with MetaMask, but purchase may have succeeded. Please check your wallet.')
+        
+        // Set purchase info for SDK errors since transaction likely succeeded  
+        setLastPurchase({
+          type: 'package',
+          items: {
+            nftTypes: [1, 2, 3, 4, 5] // Default package contents
+          }
+        })
+        return // Don't throw error for SDK connection issues
+      }
+      
+      setError(errorMsg)
       throw err
     } finally {
       setIsProcessing(false)
@@ -195,15 +251,45 @@ export function useShop() {
         await refetchAllowance()
       }
       
-      await writeContract({
+      const result = await writeContract({
         address: contracts.NFTShop.address as `0x${string}`,
         abi: shopAbi,
         functionName: 'purchaseSingleQuestNFT',
         args: [BigInt(nftType)],
       })
+      
+      console.log('✅ Single NFT Purchase submitted:', result)
+      
+      // Set purchase info for success modal (will show when transaction confirms)
+      setLastPurchase({
+        type: 'single',
+        items: {
+          nftType: nftType
+        }
+      })
     } catch (err) {
       console.error('Single Quest NFT purchase failed:', err)
-      setError(err instanceof Error ? err.message : 'Failed to purchase Quest NFT')
+      
+      // Check if this is just a MetaMask SDK connection error but transaction went through
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      if (errorMsg.includes('metamask-sdk.api.cx.metamask.io') || 
+          errorMsg.includes('ERR_CONNECTION_RESET') ||
+          errorMsg.includes('ERR_CONNECTION_CLOSED')) {
+        console.log('⚠️ MetaMask SDK connection error, but transaction may have succeeded')
+        console.log('Check your wallet and refresh the page to see if NFTs arrived')
+        setError('Network connection issue with MetaMask, but purchase may have succeeded. Please check your wallet.')
+        
+        // Set purchase info for SDK errors since transaction likely succeeded
+        setLastPurchase({
+          type: 'single',
+          items: {
+            nftType: nftType
+          }
+        })
+        return // Don't throw error for SDK connection issues
+      }
+      
+      setError(errorMsg)
       throw err
     } finally {
       setIsProcessing(false)
@@ -224,15 +310,45 @@ export function useShop() {
         await refetchAllowance()
       }
       
-      await writeContract({
+      const result = await writeContract({
         address: contracts.NFTShop.address as `0x${string}`,
         abi: shopAbi,
         functionName: 'purchasePlantToken',
         args: [plantName],
       })
+      
+      console.log('✅ Plant Token Purchase submitted:', result)
+      
+      // Set purchase info for success modal (will show when transaction confirms)
+      setLastPurchase({
+        type: 'plant',
+        items: {
+          plantName: plantName
+        }
+      })
     } catch (err) {
       console.error('Plant Token purchase failed:', err)
-      setError(err instanceof Error ? err.message : 'Failed to purchase Plant Token')
+      
+      // Check if this is just a MetaMask SDK connection error but transaction went through
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      if (errorMsg.includes('metamask-sdk.api.cx.metamask.io') || 
+          errorMsg.includes('ERR_CONNECTION_RESET') ||
+          errorMsg.includes('ERR_CONNECTION_CLOSED')) {
+        console.log('⚠️ MetaMask SDK connection error, but transaction may have succeeded')
+        console.log('Check your wallet and refresh the page to see if Plant Tokens arrived')
+        setError('Network connection issue with MetaMask, but purchase may have succeeded. Please check your wallet.')
+        
+        // Set purchase info for SDK errors since transaction likely succeeded
+        setLastPurchase({
+          type: 'plant',
+          items: {
+            plantName: plantName
+          }
+        })
+        return // Don't throw error for SDK connection issues
+      }
+      
+      setError(errorMsg)
       throw err
     } finally {
       setIsProcessing(false)
@@ -258,6 +374,8 @@ export function useShop() {
     // States
     isProcessing: isProcessing || isPending || isConfirming,
     error,
+    showSuccessModal,
+    lastPurchase,
     
     // Actions
     purchaseQuestNFTPackage,
@@ -265,6 +383,7 @@ export function useShop() {
     purchasePlantToken,
     getUSDTFromFaucet,
     approveUSDT,
+    closeSuccessModal: () => setShowSuccessModal(false),
     
     // Utilities
     formatUSDT,

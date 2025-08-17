@@ -10,6 +10,7 @@ import {
   CubeIcon
 } from '@heroicons/react/24/outline'
 import { useShop } from '@/hooks/useShop'
+import { PurchaseSuccessModal } from './purchase-success-modal'
 import { useAccount } from 'wagmi'
 import { ShopCard } from './shop-card'
 import { USDTBalance } from './usdt-balance'
@@ -41,12 +42,15 @@ export function ShopPage() {
     usdtBalance,
     isProcessing,
     error,
+    showSuccessModal,
+    lastPurchase,
     purchaseQuestNFTPackage,
     purchaseSingleQuestNFT,
     purchasePlantToken,
     getUSDTFromFaucet,
     formatUSDT,
-    canAfford
+    canAfford,
+    closeSuccessModal
   } = useShop()
 
   const [selectedNFTType, setSelectedNFTType] = useState<number | null>(null)
@@ -254,6 +258,14 @@ export function ShopPage() {
           </motion.div>
         )}
       </div>
+      
+      {/* Purchase Success Modal */}
+      <PurchaseSuccessModal
+        isOpen={showSuccessModal}
+        onClose={closeSuccessModal}
+        purchaseType={lastPurchase?.type || 'package'}
+        purchasedItems={lastPurchase?.items}
+      />
     </div>
   )
 }
