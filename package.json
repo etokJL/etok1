@@ -8,10 +8,13 @@
     "test": "hardhat test",
     "node": "hardhat node",
     "deploy": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:quick": "./quick-deploy.sh",
     "frontend": "cd frontend && npm run dev",
-    "backend": "cd backend && php artisan serve --host=127.0.0.1 --port=8282",
+    "backend": "cd backend && php artisan serve --host=127.0.0.1 --port=8000",
     "monitor": "node monitor.js",
-    "start": "node monitor.js"
+    "start": "node monitor.js",
+    "contracts:check": "curl -s http://localhost:8000/api/contracts/check | jq",
+    "contracts:reload": "curl -X POST http://localhost:8000/api/contracts/reload"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",

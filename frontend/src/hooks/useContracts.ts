@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { writeContract, waitForTransactionReceipt } from 'wagmi/actions'
 
 import { config } from '@/lib/wagmi'
-import contracts from '@/contracts.json'
+import { useDynamicContracts } from './useDynamicContracts'
 import { formatEther } from 'viem'
 
 // Hook for QuestNFT contract interactions

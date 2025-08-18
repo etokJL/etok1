@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useAccount, useReadContract, useReadContracts } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 import { config } from '@/lib/wagmi'
-import contracts from '@/contracts.json'
+import { useDynamicContracts } from './useDynamicContracts'
 
 export interface OnChainNFT {
   tokenId: string
@@ -25,26 +25,23 @@ export function useBlockchainNFTData() {
   const [nfts, setNfts] = useState<OnChainNFT[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { contracts: dynamicContracts } = useDynamicContracts()
 
   // Note: totalBalance removed as it's not needed for ERC-1155 multi-type queries
 
-  // Get total NFT balance (ERC-721A)
-  const totalBalanceQuery = {
-    address: contracts.QuestNFT.address as `0x${string}`,
-    abi: contracts.QuestNFT.abi,
+  // Get total NFT balance (ERC-721A) - using dynamic contracts
+  const { data: totalBalance } = useReadContract({
+    address: dynamicContracts?.QuestNFT?.address as `0x${string}`,
+    abi: dynamicContracts?.QuestNFT?.abi,
     functionName: 'balanceOf',
     args: [address], // ERC-721A balanceOf(address)
-  }
-
-  const { data: totalBalance } = useReadContract({
-    ...totalBalanceQuery,
     query: {
-      enabled: isConnected && !!address,
+      enabled: isConnected && !!address && !!dynamicContracts?.QuestNFT?.address,
     },
   })
 
   const fetchNFTDetails = useCallback(async () => {
-    if (!isConnected || !address || !totalBalance) return
+    if (!isConnected || !address || !totalBalance || !dynamicContracts?.QuestNFT?.address) return
 
     setLoading(true)
     setError(null)
@@ -67,8 +64,8 @@ export function useBlockchainNFTData() {
         try {
           // Get actual NFT types from contract using getUserNFTCounts
           const nftCounts = await readContract(config, {
-            address: contracts.QuestNFT.address as `0x${string}`,
-            abi: contracts.QuestNFT.abi,
+            address: dynamicContracts.QuestNFT.address as `0x${string}`,
+            abi: dynamicContracts.QuestNFT.abi,
             functionName: 'getUserNFTCounts',
             args: [address],
           }) as bigint[]
@@ -112,7 +109,7 @@ export function useBlockchainNFTData() {
     } finally {
       setLoading(false)
     }
-  }, [isConnected, address, totalBalance])
+  }, [isConnected, address, totalBalance, dynamicContracts])
 
   useEffect(() => {
     fetchNFTDetails()
@@ -136,18 +133,21 @@ export function useBlockchainPlantData() {
   const [plants, setPlants] = useState<OnChainPlantToken[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { contracts: dynamicContracts } = useDynamicContracts()
 
-  // Get user's plant tokens
+  // Get user's plant tokens - using dynamic contracts
   const { data: userTokens } = useReadContract({
-    address: contracts.PlantToken.address as `0x${string}`,
-    abi: contracts.PlantToken.abi,
+    address: dynamicContracts?.PlantToken?.address as `0x${string}`,
+    abi: dynamicContracts?.PlantToken?.abi,
     functionName: 'getOwnerTokens',
     args: [address],
-    enabled: isConnected && !!address,
+    query: {
+      enabled: isConnected && !!address && !!dynamicContracts?.PlantToken?.address,
+    }
   })
 
   const fetchPlantDetails = useCallback(async () => {
-    if (!isConnected || !address || !userTokens) return
+    if (!isConnected || !address || !userTokens || !dynamicContracts?.PlantToken?.address) return
 
     setLoading(true)
     setError(null)
@@ -181,7 +181,7 @@ export function useBlockchainPlantData() {
     } finally {
       setLoading(false)
     }
-  }, [isConnected, address, userTokens])
+  }, [isConnected, address, userTokens, dynamicContracts])
 
   useEffect(() => {
     fetchPlantDetails()
@@ -222,13 +222,16 @@ function getNFTTypeName(nftType: number): string {
 // Check if user can create plant (has all 15 NFT types)
 export function useCanCreatePlant() {
   const { address, isConnected } = useAccount()
+  const { contracts: dynamicContracts } = useDynamicContracts()
   
   const { data: canCreate } = useReadContract({
-    address: contracts.QuestNFT.address as `0x${string}`,
-    abi: contracts.QuestNFT.abi,
+    address: dynamicContracts?.QuestNFT?.address as `0x${string}`,
+    abi: dynamicContracts?.QuestNFT?.abi,
     functionName: 'canCreatePlant',
     args: [address],
-    enabled: isConnected && !!address,
+    query: {
+      enabled: isConnected && !!address && !!dynamicContracts?.QuestNFT?.address,
+    }
   })
 
   return {

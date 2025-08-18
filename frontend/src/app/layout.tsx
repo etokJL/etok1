@@ -4,6 +4,7 @@ import './simple-globals.css'
 import { Providers } from '@/components/providers'
 import { Navigation } from '@/components/layout/navigation'
 import { ChatProvider } from '@/components/providers/chat-provider'
+import { ContractStatus } from '@/components/common/contract-status'
 import { APP_NAME, APP_DESCRIPTION } from '@/lib/constants'
 
 const inter = Inter({ 
@@ -91,6 +92,7 @@ export default function RootLayout({
               {children}
             </main>
             <ChatProvider />
+            <ContractStatus />
           </div>
         </Providers>
       </body>

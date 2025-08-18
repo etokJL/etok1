@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
 import { parseAbi, formatUnits, parseUnits } from 'viem'
-import contracts from '@/contracts.json'
+import { useDynamicContracts } from './useDynamicContracts'
 
 // Contract ABIs
 const shopAbi = parseAbi([
@@ -41,6 +41,7 @@ export function useShop() {
   const { address } = useAccount()
   const { writeContract, data: hash, isPending } = useWriteContract()
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash })
+  const { contracts: dynamicContracts, isLoading: contractsLoading, error: contractsError, deployed } = useDynamicContracts()
 
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,8 +60,16 @@ export function useShop() {
     if (isSuccess && lastPurchase && !showSuccessModal) {
       console.log('✅ Transaction confirmed! Showing success modal')
       setShowSuccessModal(true)
+      setIsProcessing(false) // Reset processing state
     }
   }, [isSuccess, lastPurchase, showSuccessModal])
+  
+  // Reset processing state and modal when transaction finishes
+  useEffect(() => {
+    if (!isConfirming && !isPending) {
+      setIsProcessing(false)
+    }
+  }, [isConfirming, isPending])
   
   // Reset modal state when starting new transaction
   useEffect(() => {
@@ -73,32 +82,44 @@ export function useShop() {
 
   // Read shop prices
   const { data: pricesData } = useReadContract({
-    address: contracts.NFTShop.address as `0x${string}`,
+    address: dynamicContracts?.NFTShop?.address as `0x${string}`,
     abi: shopAbi,
     functionName: 'getPrices',
+    query: {
+      enabled: !!dynamicContracts?.NFTShop?.address
+    }
   })
 
   // Read user USDT balance
   const { data: usdtBalance, refetch: refetchBalance } = useReadContract({
-    address: contracts.MockUSDT.address as `0x${string}`,
+    address: dynamicContracts?.MockUSDT?.address as `0x${string}`,
     abi: usdtAbi,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
+    query: {
+      enabled: !!dynamicContracts?.MockUSDT?.address && !!address
+    }
   })
 
   // Read USDT allowance for shop
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
-    address: contracts.MockUSDT.address as `0x${string}`,
+    address: dynamicContracts?.MockUSDT?.address as `0x${string}`,
     abi: usdtAbi,
     functionName: 'allowance',
-    args: address ? [address, contracts.NFTShop.address] : undefined,
+    args: address && dynamicContracts?.NFTShop?.address ? [address, dynamicContracts.NFTShop.address] : undefined,
+    query: {
+      enabled: !!dynamicContracts?.MockUSDT?.address && !!dynamicContracts?.NFTShop?.address && !!address
+    }
   })
 
   // Read shop stats
   const { data: shopStatsData } = useReadContract({
-    address: contracts.NFTShop.address as `0x${string}`,
+    address: dynamicContracts?.NFTShop?.address as `0x${string}`,
     abi: shopAbi,
     functionName: 'getShopStats',
+    query: {
+      enabled: !!dynamicContracts?.NFTShop?.address
+    }
   })
 
   const prices: ShopPrices | null = pricesData ? {
@@ -137,16 +158,32 @@ export function useShop() {
   // Approve USDT spending
   const approveUSDT = useCallback(async (amount: bigint) => {
     if (!address) throw new Error('Wallet not connected')
+
+    // More robust contract loading check
+    if (!dynamicContracts?.MockUSDT?.address || !dynamicContracts?.NFTShop?.address || 
+        !dynamicContracts?.MockUSDT?.abi || !dynamicContracts?.NFTShop?.abi) {
+      console.log('⏳ Contracts not fully loaded yet. Missing:', {
+        mockUSDTAddress: !!dynamicContracts?.MockUSDT?.address,
+        nftShopAddress: !!dynamicContracts?.NFTShop?.address,
+        mockUSDTAbi: !!dynamicContracts?.MockUSDT?.abi,
+        nftShopAbi: !!dynamicContracts?.NFTShop?.abi
+      })
+      
+      // Wait a bit and try to reload contracts
+      const errorMsg = 'Contracts are still loading. Please wait a moment and try again.'
+      setError(errorMsg)
+      throw new Error(errorMsg)
+    }
     
     try {
       setError(null)
       setIsProcessing(true)
-      
+
       await writeContract({
-        address: contracts.MockUSDT.address as `0x${string}`,
+        address: dynamicContracts.MockUSDT.address as `0x${string}`,
         abi: usdtAbi,
         functionName: 'approve',
-        args: [contracts.NFTShop.address, amount],
+        args: [dynamicContracts.NFTShop.address, amount],
       })
     } catch (err) {
       console.error('USDT approval failed:', err)
@@ -165,17 +202,22 @@ export function useShop() {
       setError(null)
       setIsProcessing(true)
       
-      await writeContract({
-        address: contracts.MockUSDT.address as `0x${string}`,
+      if (!dynamicContracts?.MockUSDT?.address) {
+        throw new Error('USDT contract not loaded yet')
+      }
+
+      console.log('🚰 Getting USDT from faucet...')
+      const result = await writeContract({
+        address: dynamicContracts.MockUSDT.address as `0x${string}`,
         abi: usdtAbi,
         functionName: 'faucet',
       })
+      
+      console.log('✅ USDT faucet transaction submitted:', result)
     } catch (err) {
-      console.error('USDT faucet failed:', err)
+      console.error('❌ USDT faucet failed:', err)
       setError(err instanceof Error ? err.message : 'Failed to get USDT from faucet')
       throw err
-    } finally {
-      setIsProcessing(false)
     }
   }, [address, writeContract])
 
@@ -193,8 +235,12 @@ export function useShop() {
         await refetchAllowance()
       }
       
+      if (!dynamicContracts?.NFTShop?.address) {
+        throw new Error('Shop contract not loaded yet')
+      }
+
       const result = await writeContract({
-        address: contracts.NFTShop.address as `0x${string}`,
+        address: dynamicContracts.NFTShop.address as `0x${string}`,
         abi: shopAbi,
         functionName: 'purchaseQuestNFTPackage',
       })
@@ -235,7 +281,7 @@ export function useShop() {
     } finally {
       setIsProcessing(false)
     }
-  }, [address, prices, allowance, approveUSDT, refetchAllowance, writeContract])
+  }, [address, prices, allowance, approveUSDT, refetchAllowance, writeContract, dynamicContracts])
 
   // Purchase single Quest NFT
   const purchaseSingleQuestNFT = useCallback(async (nftType: number) => {
@@ -251,8 +297,12 @@ export function useShop() {
         await refetchAllowance()
       }
       
+      if (!dynamicContracts?.NFTShop?.address) {
+        throw new Error('Shop contract not loaded yet')
+      }
+
       const result = await writeContract({
-        address: contracts.NFTShop.address as `0x${string}`,
+        address: dynamicContracts.NFTShop.address as `0x${string}`,
         abi: shopAbi,
         functionName: 'purchaseSingleQuestNFT',
         args: [BigInt(nftType)],
@@ -294,7 +344,7 @@ export function useShop() {
     } finally {
       setIsProcessing(false)
     }
-  }, [address, prices, allowance, approveUSDT, refetchAllowance, writeContract])
+  }, [address, prices, allowance, approveUSDT, refetchAllowance, writeContract, dynamicContracts])
 
   // Purchase Plant Token
   const purchasePlantToken = useCallback(async (plantName: string) => {
@@ -310,8 +360,12 @@ export function useShop() {
         await refetchAllowance()
       }
       
+      if (!dynamicContracts?.NFTShop?.address) {
+        throw new Error('Shop contract not loaded yet')
+      }
+
       const result = await writeContract({
-        address: contracts.NFTShop.address as `0x${string}`,
+        address: dynamicContracts.NFTShop.address as `0x${string}`,
         abi: shopAbi,
         functionName: 'purchasePlantToken',
         args: [plantName],
@@ -353,7 +407,7 @@ export function useShop() {
     } finally {
       setIsProcessing(false)
     }
-  }, [address, prices, allowance, approveUSDT, refetchAllowance, writeContract])
+  }, [address, prices, allowance, approveUSDT, refetchAllowance, writeContract, dynamicContracts])
 
   // Refresh data after successful transaction
   useEffect(() => {
@@ -372,12 +426,20 @@ export function useShop() {
     allowance: allowance || 0n,
     
     // States
-    isProcessing: isProcessing || isPending || isConfirming,
-    error,
+    isProcessing: isProcessing || isPending || isConfirming || contractsLoading,
+    error: error || contractsError,
     showSuccessModal,
     lastPurchase,
     
-    // Actions
+    // Contract status - more thorough check
+    contractsLoaded: !!dynamicContracts && 
+                    !!dynamicContracts.NFTShop?.address && !!dynamicContracts.NFTShop?.abi &&
+                    !!dynamicContracts.MockUSDT?.address && !!dynamicContracts.MockUSDT?.abi &&
+                    !!dynamicContracts.QuestNFT?.address && !!dynamicContracts.QuestNFT?.abi &&
+                    !contractsLoading,
+    contractsError,
+    
+    // Actions (all enabled, but with proper contract loading checks)
     purchaseQuestNFTPackage,
     purchaseSingleQuestNFT,
     purchasePlantToken,
@@ -392,6 +454,9 @@ export function useShop() {
     // Refresh functions
     refetchBalance,
     refetchAllowance,
+    
+    // Contract info
+    contracts: dynamicContracts,
   }
 }
 

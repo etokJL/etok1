@@ -11,6 +11,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\ContractController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +29,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Authentication routes (public)
+// Frontend User Authentication routes (public)
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
@@ -45,10 +47,39 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+// Admin Authentication routes (separate from frontend users)
+Route::prefix('admin/auth')->group(function () {
+    Route::post('/login', [AdminAuthController::class, 'login']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/user', [AdminAuthController::class, 'user']);
+        Route::post('/logout', [AdminAuthController::class, 'logout']);
+        Route::post('/logout-all', [AdminAuthController::class, 'logoutAll']);
+        Route::post('/create-admin', [AdminAuthController::class, 'createAdmin']);
+        Route::get('/admins', [AdminAuthController::class, 'listAdmins']);
+        Route::patch('/admins/{admin}/status', [AdminAuthController::class, 'updateAdminStatus']);
+    });
+});
+
+// Admin User Management routes (for managing frontend users)
+Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+    Route::get('/frontend-users', [AdminAuthController::class, 'getUsers']);
+    Route::get('/frontend-users/{user}', [AdminAuthController::class, 'getUser']);
+    Route::put('/frontend-users/{user}', [AdminAuthController::class, 'updateUser']);
+    Route::delete('/frontend-users/{user}', [AdminAuthController::class, 'deleteUser']);
+    Route::post('/frontend-users', [AdminAuthController::class, 'createUser']);
+});
+
 // Broadcasting auth endpoint (for WebSocket authentication)
 Route::middleware('auth:sanctum')->post('/broadcasting/auth', function (Request $request) {
     // For public channels, always return success
     return response()->json(['auth' => true]);
+});
+
+// Contract Management routes (public for development)
+Route::prefix('contracts')->group(function () {
+    Route::get('/', [ContractController::class, 'getContracts']);
+    Route::get('/check', [ContractController::class, 'checkDeployment']);
+    Route::post('/reload', [ContractController::class, 'reloadContracts']);
 });
 
 // Chat routes (protected)

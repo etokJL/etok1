@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import contracts from '@/contracts.json'
+import { useDynamicContracts } from './useDynamicContracts'
 
 export interface AirdropData {
   id: number
@@ -21,6 +21,7 @@ export function useAirdrop() {
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   })
+  const { contracts: dynamicContracts } = useDynamicContracts()
 
   const executeAirdropForUser = useCallback(async (airdrop: AirdropData) => {
     if (!isConnected || !address) {
@@ -35,11 +36,15 @@ export function useAirdrop() {
       console.log('🎁 Executing airdrop via MetaMask...')
       console.log('Airdrop:', airdrop)
 
+      if (!dynamicContracts?.QuestNFT?.address) {
+        throw new Error('QuestNFT contract not loaded yet')
+      }
+
       // Create a weekly package first
       console.log('📦 Creating weekly package...')
       await writeContract({
-        address: contracts.QuestNFT.address as `0x${string}`,
-        abi: contracts.QuestNFT.abi,
+        address: dynamicContracts.QuestNFT.address as `0x${string}`,
+        abi: dynamicContracts.QuestNFT.abi,
         functionName: 'createWeeklyPackage',
       })
 
@@ -54,8 +59,8 @@ export function useAirdrop() {
         
         // Get current package ID and purchase the latest one
         await writeContract({
-          address: contracts.QuestNFT.address as `0x${string}`,
-          abi: contracts.QuestNFT.abi,
+          address: dynamicContracts.QuestNFT.address as `0x${string}`,
+          abi: dynamicContracts.QuestNFT.abi,
           functionName: 'purchasePackage',
           args: [0], // This should be the actual package ID
         })
@@ -71,7 +76,7 @@ export function useAirdrop() {
     } finally {
       setIsExecuting(false)
     }
-  }, [isConnected, address, writeContract, hash])
+  }, [isConnected, address, writeContract, hash, dynamicContracts])
 
   const createPackageForSelf = useCallback(async () => {
     if (!isConnected || !address) {
@@ -79,12 +84,17 @@ export function useAirdrop() {
       return false
     }
 
+    if (!dynamicContracts?.QuestNFT?.address) {
+      setError('QuestNFT contract not loaded yet')
+      return false
+    }
+
     try {
       console.log('📦 Creating package for self via MetaMask...')
       
       await writeContract({
-        address: contracts.QuestNFT.address as `0x${string}`,
-        abi: contracts.QuestNFT.abi,
+        address: dynamicContracts.QuestNFT.address as `0x${string}`,
+        abi: dynamicContracts.QuestNFT.abi,
         functionName: 'createWeeklyPackage',
       })
 
@@ -94,7 +104,7 @@ export function useAirdrop() {
       setError(err instanceof Error ? err.message : 'Failed to create package')
       return false
     }
-  }, [isConnected, address, writeContract])
+  }, [isConnected, address, writeContract, dynamicContracts])
 
   const purchasePackage = useCallback(async (packageId: number) => {
     if (!isConnected || !address) {
@@ -102,12 +112,17 @@ export function useAirdrop() {
       return false
     }
 
+    if (!dynamicContracts?.QuestNFT?.address) {
+      setError('QuestNFT contract not loaded yet')
+      return false
+    }
+
     try {
       console.log(`🛒 Purchasing package ${packageId} via MetaMask...`)
       
       await writeContract({
-        address: contracts.QuestNFT.address as `0x${string}`,
-        abi: contracts.QuestNFT.abi,
+        address: dynamicContracts.QuestNFT.address as `0x${string}`,
+        abi: dynamicContracts.QuestNFT.abi,
         functionName: 'purchasePackage',
         args: [packageId],
       })
@@ -118,7 +133,7 @@ export function useAirdrop() {
       setError(err instanceof Error ? err.message : 'Failed to purchase package')
       return false
     }
-  }, [isConnected, address, writeContract])
+  }, [isConnected, address, writeContract, dynamicContracts])
 
   return {
     executeAirdropForUser,

@@ -33,7 +33,7 @@ export function USDTBalance({ balance, formatUSDT, onGetFaucet, isProcessing }: 
         </div>
       </div>
 
-      {needsFaucet && (
+      {needsFaucet && process.env.NODE_ENV === 'development' && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -41,10 +41,10 @@ export function USDTBalance({ balance, formatUSDT, onGetFaucet, isProcessing }: 
         >
           <div className="flex items-center mb-2">
             <GiftIcon className="h-5 w-5 mr-2" />
-            <span className="font-medium">Need USDT?</span>
+            <span className="font-medium">Need USDT? (DEV Only)</span>
           </div>
           <p className="text-sm text-green-100 mb-3">
-            Get free USDT from our faucet to start shopping!
+            Get free USDT from our development faucet to start shopping!
           </p>
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -53,7 +53,7 @@ export function USDTBalance({ balance, formatUSDT, onGetFaucet, isProcessing }: 
             disabled={isProcessing}
             className="bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isProcessing ? 'Getting USDT...' : 'Get 1000 USDT Free'}
+            {isProcessing ? 'Getting USDT...' : 'Get 1000 USDT Free (DEV)'}
           </motion.button>
         </motion.div>
       )}

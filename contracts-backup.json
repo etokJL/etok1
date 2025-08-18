@@ -2624,5 +2624,9 @@
       }
     ],
     "deployedAt": "2025-08-18T11:55:21.750Z"
-  }
+  },
+  "deployedBy": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "deployedAt": "2025-08-18T11:55:21.750Z",
+  "network": "localhost",
+  "chainId": 31337
 }

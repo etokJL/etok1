@@ -50,7 +50,9 @@ export function ShopPage() {
     getUSDTFromFaucet,
     formatUSDT,
     canAfford,
-    closeSuccessModal
+    closeSuccessModal,
+    contractsLoaded,
+    contractsError
   } = useShop()
 
   const [selectedNFTType, setSelectedNFTType] = useState<number | null>(null)
@@ -64,6 +66,31 @@ export function ShopPage() {
           <ShoppingCartIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect Wallet</h2>
           <p className="text-gray-600">Please connect your wallet to access the shop</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading state while contracts are loading
+  if (!contractsLoaded) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Shop</h2>
+          <p className="text-gray-600">
+            {contractsError ? 
+              `Contract Error: ${contractsError}` : 
+              'Connecting to blockchain contracts...'}
+          </p>
+          {contractsError && (
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          )}
         </div>
       </div>
     )
