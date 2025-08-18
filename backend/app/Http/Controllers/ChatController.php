@@ -56,11 +56,16 @@ class ChatController extends Controller
     {
         // Get all users who have been active recently (last 24 hours)
         // This is a simple approximation of "online" users
-        $users = User::select('id', 'name', 'email', 'updated_at')
-            ->where('id', '!=', auth()->id())
+        $query = User::select('id', 'name', 'email', 'updated_at')
             ->where('updated_at', '>=', now()->subHours(24))
-            ->orderBy('updated_at', 'desc')
-            ->get()
+            ->orderBy('updated_at', 'desc');
+
+        // Exclude current user if authenticated
+        if (auth()->check()) {
+            $query->where('id', '!=', auth()->id());
+        }
+
+        $users = $query->get()
             ->map(function ($user) {
                 return [
                     'id' => $user->id,

@@ -82,11 +82,16 @@ Route::prefix('contracts')->group(function () {
     Route::post('/reload', [ContractController::class, 'reloadContracts']);
 });
 
-// Chat routes (protected)
-Route::middleware('auth:sanctum')->prefix('chat')->group(function () {
+// Chat routes (mixed access)
+Route::prefix('chat')->group(function () {
+    // Public routes - anyone can read messages and see users
     Route::get('/messages', [ChatController::class, 'getMessages']);
-    Route::post('/messages', [ChatController::class, 'sendMessage']);
     Route::get('/users', [ChatController::class, 'getOnlineUsers']);
+
+    // Protected routes - only authenticated users can send messages
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/messages', [ChatController::class, 'sendMessage']);
+    });
 });
 
 // User management routes (protected)

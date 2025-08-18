@@ -49,7 +49,7 @@ export function useAuth() {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('http://localhost:8282/api/auth/login', {
+      const response = await fetch('http://localhost:8000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ export function useAuth() {
     wallet_address?: string
   }) => {
     try {
-      const response = await fetch('http://localhost:8282/api/auth/register', {
+      const response = await fetch('http://localhost:8000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ export function useAuth() {
   const logout = async () => {
     try {
       if (authState.token) {
-        await fetch('http://localhost:8282/api/auth/logout', {
+        await fetch('http://localhost:8000/api/auth/logout', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${authState.token}`,

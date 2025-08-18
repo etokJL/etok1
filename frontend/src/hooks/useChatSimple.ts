@@ -33,15 +33,19 @@ export function useChatSimple({ channel = 'general', authToken }: UseChatSimpleO
 
   // Fetch messages
   const fetchMessages = useCallback(async () => {
-    if (!authToken) return;
-
     try {
       console.log('📥 Fetching messages...');
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+      };
+      
+      // Add auth token if available (for future authenticated features)
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/chat/messages?channel=${channel}`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Accept': 'application/json',
-        },
+        headers,
       });
 
       if (response.ok) {
@@ -58,14 +62,18 @@ export function useChatSimple({ channel = 'general', authToken }: UseChatSimpleO
 
   // Fetch users
   const fetchUsers = useCallback(async () => {
-    if (!authToken) return;
-
     try {
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+      };
+      
+      // Add auth token if available (for future authenticated features)
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/chat/users`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Accept': 'application/json',
-        },
+        headers,
       });
 
       if (response.ok) {
@@ -129,16 +137,12 @@ export function useChatSimple({ channel = 'general', authToken }: UseChatSimpleO
 
   // Load initial data
   useEffect(() => {
-    if (authToken) {
-      console.log('🔄 Loading initial chat data...');
-      setIsLoading(true);
-      Promise.all([fetchMessages(), fetchUsers()]).finally(() => {
-        setIsLoading(false);
-      });
-    } else {
+    console.log('🔄 Loading initial chat data...');
+    setIsLoading(true);
+    Promise.all([fetchMessages(), fetchUsers()]).finally(() => {
       setIsLoading(false);
-    }
-  }, [authToken, fetchMessages, fetchUsers]);
+    });
+  }, [fetchMessages, fetchUsers]);
 
   // Auto refresh messages every 5 seconds
   useEffect(() => {
