@@ -3,44 +3,30 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LoginForm } from '@/components/auth/login-form'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login, isAuthenticated } = useAuth()
 
   useEffect(() => {
     document.title = 'Login - Booster Energy'
-  }, [])
+    
+    // Redirect if already logged in
+    if (isAuthenticated) {
+      router.push('/')
+    }
+  }, [isAuthenticated, router])
 
   const handleLogin = async (email: string, password: string) => {
-    console.log('Login attempt:', email, password)
+    const result = await login(email, password)
     
-    try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const result = await response.json()
-
-      if (response.ok && result.success) {
-        console.log('Login successful:', result)
-        // Store token
-        if (result.data?.token) {
-          localStorage.setItem('auth_token', result.data.token)
-        }
-        // Redirect to dashboard or home
-        router.push('/')
-      } else {
-        console.error('Login failed:', result)
-        alert(`Login failed: ${result.message || 'Invalid credentials'}`)
-      }
-    } catch (error) {
-      console.error('Login error:', error)
-      alert('Login failed: Network error')
+    if (result.success) {
+      console.log('Login successful:', result)
+      router.push('/')
+    } else {
+      console.error('Login failed:', result.message)
+      alert(result.message || 'Login failed')
     }
   }
 

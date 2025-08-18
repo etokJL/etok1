@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\AppToken;
-use App\Models\AppUser;
+use App\Models\User;
 
 class TestNFTSeeder extends Seeder
 {
@@ -14,7 +14,7 @@ class TestNFTSeeder extends Seeder
     public function run(): void
     {
         // Create test user if not exists
-        $testUser = AppUser::firstOrCreate([
+        $testUser = User::firstOrCreate([
             'wallet_address' => '0x742d35Cc6634C0532925a3b8D7c9d24E5c55A4e1'
         ], [
             'name' => 'Test User',

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\AppToken;
-use App\Models\AppUser;
+use App\Models\User;
 
 class TestTokensSeeder extends Seeder
 {
@@ -14,10 +14,12 @@ class TestTokensSeeder extends Seeder
     public function run(): void
     {
         // Create test user
-        $testUser = AppUser::firstOrCreate([
+        $testUser = User::firstOrCreate([
             'wallet_address' => '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
         ], [
-            'username' => 'test_user',
+            'name' => 'test_user',
+            'email' => 'test@example.com',
+            'password' => bcrypt('password123'),
             'is_active' => true,
             'eligible_for_airdrops' => true,
         ]);

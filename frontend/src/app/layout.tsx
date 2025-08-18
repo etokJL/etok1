@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import './simple-globals.css'
 import { Providers } from '@/components/providers'
 import { Navigation } from '@/components/layout/navigation'
-import { ChatWidget } from '@/components/chat/chat-widget'
+import { ChatProvider } from '@/components/providers/chat-provider'
 import { APP_NAME, APP_DESCRIPTION } from '@/lib/constants'
 
 const inter = Inter({ 
@@ -90,7 +90,7 @@ export default function RootLayout({
             <main className="flex-1">
               {children}
             </main>
-            <ChatWidget />
+            <ChatProvider />
           </div>
         </Providers>
       </body>

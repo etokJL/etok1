@@ -15,18 +15,17 @@ services:
       SETTING_RABBITMQ_HOST: "rabbitmq"
       SETTING_REDIS_HOST: "redis"
       
-      # Email settings (for development)
-      SETTING_EMAIL_HOST: ""
-      SETTING_EMAIL_HOST_USER: ""
-      SETTING_EMAIL_PORT: "587"
-      SETTING_EMAIL_USE_TLS: "true"
+      # Email settings (disabled for development)
+      SETTING_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
       
       # Security settings
       SECRETS_secret_key: "your-secret-key-here-change-this-in-production"
-      SETTING_SECURE_SSL_REDIRECT: "false"
+      SETTING_SECURE_SSL_REDIRECT: "False"
+      SSL_CERTIFICATE_GENERATION: "self-signed"
+      SETTING_ENABLE_DEVELOPMENT_LOGIN: "True"
       
       # Chat settings
-      SETTING_ENABLE_GUEST_USER_ACCESS: "true"
+      SETTING_ENABLE_GUEST_USER_ACCESS: "True"
       SETTING_WILDCARD_MENTION_POLICY: "1"
       SETTING_REALM_NAME: "Booster Energy Chat"
       SETTING_REALM_DESCRIPTION: "Community chat for Booster Energy NFT platform"

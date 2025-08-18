@@ -1,0 +1,68 @@
+services:
+  zulip:
+    image: zulip/docker-zulip:9.0-0
+    container_name: simple-zulip
+    ports:
+      - "9090:80"
+    environment:
+      # Minimal configuration for development
+      SETTING_EXTERNAL_HOST: "localhost:9090"
+      SETTING_ZULIP_ADMINISTRATOR: "admin@localhost"
+      
+      # Database
+      SETTING_MEMCACHED_LOCATION: "memcached:11211"
+      SETTING_RABBITMQ_HOST: "rabbitmq"
+      SETTING_REDIS_HOST: "redis"
+      
+      # Simple email setup
+      SETTING_EMAIL_BACKEND: "django.core.mail.backends.console.EmailBackend"
+      
+      # Security (simplified)
+      SECRETS_secret_key: "simple-development-key-123"
+      SSL_CERTIFICATE_GENERATION: "self-signed"
+      
+      # Development settings
+      SETTING_DEVELOPMENT: "True"
+      SETTING_DEBUG: "False"
+      
+      # Realm settings
+      SETTING_REALM_NAME: "Energy Chat"
+      
+    volumes:
+      - simple-zulip-data:/data
+    depends_on:
+      - memcached
+      - rabbitmq
+      - redis
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:14
+    container_name: simple-postgres
+    environment:
+      POSTGRES_DB: zulip
+      POSTGRES_USER: zulip
+      POSTGRES_PASSWORD: simple_password
+    volumes:
+      - simple-postgres-data:/var/lib/postgresql/data
+
+  memcached:
+    image: memcached:alpine
+    container_name: simple-memcached
+
+  rabbitmq:
+    image: rabbitmq:3.9-alpine
+    container_name: simple-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: zulip
+      RABBITMQ_DEFAULT_PASS: simple_password
+
+  redis:
+    image: redis:alpine
+    container_name: simple-redis
+
+volumes:
+  simple-zulip-data:
+  simple-postgres-data:
+

@@ -83,7 +83,7 @@ export const STORAGE_KEYS = {
 
 // API endpoints (to be configured)
 export const API = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8282/api',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
   METADATA: '/metadata',
   CHAT: '/chat',
   ANALYTICS: '/analytics',

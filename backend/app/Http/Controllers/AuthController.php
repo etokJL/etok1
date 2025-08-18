@@ -40,6 +40,8 @@ class AuthController extends Controller
             'eligible_for_airdrops' => true,
         ]);
 
+        // No need for separate AppUser record - everything is now in the User model
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -139,6 +141,8 @@ class AuthController extends Controller
         }
 
         $user->update($request->only(['name', 'email', 'wallet_address']));
+
+        // No need for separate AppUser record - everything is now in the User model
 
         return response()->json([
             'success' => true,

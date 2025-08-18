@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
 import { motion } from 'framer-motion'
 import { 
   HomeIcon, 
@@ -26,6 +27,7 @@ const navigation = [
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { user, isAuthenticated, logout } = useAuth()
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -67,22 +69,44 @@ export function Navigation() {
 
           {/* Auth & Wallet Connection */}
           <div className="flex items-center space-x-4">
-            {/* Login/Register Buttons */}
+            {/* Auth Section */}
             <div className="hidden md:flex items-center space-x-2">
-              <Link
-                href="/auth/login"
-                className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <UserIcon className="h-4 w-4 mr-2" />
-                Login
-              </Link>
-              <Link
-                href="/auth/register"
-                className="flex items-center px-3 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
-              >
-                <UserPlusIcon className="h-4 w-4 mr-2" />
-                Register
-              </Link>
+              {isAuthenticated && user ? (
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      {user.name}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <UserIcon className="h-4 w-4 mr-2" />
+                    Login
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="flex items-center px-3 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    <UserPlusIcon className="h-4 w-4 mr-2" />
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
 
             <WalletConnection />
@@ -90,6 +114,7 @@ export function Navigation() {
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button
+                type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="text-gray-600 hover:text-gray-900"
               >

@@ -3,13 +3,20 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { RegisterForm } from '@/components/auth/register-form'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { register, isAuthenticated } = useAuth()
 
   useEffect(() => {
     document.title = 'Register - Booster Energy'
-  }, [])
+    
+    // Redirect if already logged in
+    if (isAuthenticated) {
+      router.push('/')
+    }
+  }, [isAuthenticated, router])
 
   const handleRegister = async (data: {
     name: string
@@ -18,42 +25,21 @@ export default function RegisterPage() {
     password_confirmation: string
     wallet_address?: string
   }) => {
-    console.log('Register attempt:', data)
+    const result = await register(data)
     
-    try {
-      const response = await fetch('http://localhost:8000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      const result = await response.json()
-
-      if (response.ok && result.success) {
-        console.log('Registration successful:', result)
-        // Store token if provided
-        if (result.data?.token) {
-          localStorage.setItem('auth_token', result.data.token)
-        }
-        // Redirect to login or dashboard
-        router.push('/auth/login?registered=true')
+    if (result.success) {
+      console.log('Registration successful:', result)
+      router.push('/')
+    } else {
+      console.error('Registration failed:', result.message)
+      
+      // Show detailed validation errors
+      if (result.errors) {
+        const errorMessages = Object.values(result.errors).flat().join('\n')
+        alert(`Registration failed:\n${errorMessages}`)
       } else {
-        console.error('Registration failed:', result)
-        
-        // Show specific validation errors
-        if (result.errors) {
-          const errorMessages = Object.values(result.errors).flat().join('\n')
-          alert(`Registration failed:\n\n${errorMessages}`)
-        } else {
-          alert(`Registration failed: ${result.message || 'Unknown error'}`)
-        }
+        alert(`Registration failed: ${result.message || 'Unknown error'}`)
       }
-    } catch (error) {
-      console.error('Registration error:', error)
-      alert('Registration failed: Network error')
     }
   }
 

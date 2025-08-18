@@ -31,7 +31,7 @@ class AppToken extends Model
      */
     public function owner()
     {
-        return $this->belongsTo(AppUser::class, 'owner_address', 'wallet_address');
+        return $this->belongsTo(User::class, 'owner_address', 'wallet_address');
     }
 
     /**

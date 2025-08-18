@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\AppToken;
-use App\Models\AppUser;
+use App\Models\User;
 
 class RealTokensSeeder extends Seeder
 {
@@ -18,7 +18,7 @@ class RealTokensSeeder extends Seeder
         AppToken::where('owner_address', $userAddress)->delete();
 
         // Ensure user exists
-        $user = AppUser::firstOrCreate([
+        $user = User::firstOrCreate([
             'wallet_address' => $userAddress
         ], [
             'name' => 'Test User Real',

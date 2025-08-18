@@ -29,10 +29,10 @@ class ServiceMonitor {
             backend: {
                 name: 'Laravel Backend',
                 command: 'php',
-                args: ['artisan', 'serve', '--host=127.0.0.1', '--port=8282'],
+                args: ['artisan', 'serve', '--host=127.0.0.1', '--port=8000'],
                 cwd: '/Users/jgtcdghun/workspace/booster/backend',
-                port: 8282,
-                healthCheck: '/admin',
+                port: 8000,
+                healthCheck: '/api',
                 icon: '🛠️'
             },
             frontend: {
@@ -248,8 +248,9 @@ class ServiceMonitor {
 
         console.log('\n📊 \x1b[1mQuick Links:\x1b[0m');
         console.log('   🎮 Frontend:  http://localhost:3000');
-        console.log('   🛠️ Admin:     http://127.0.0.1:8282/admin');
-        console.log('   📡 API:       http://127.0.0.1:8282/api/v1/stats');
+        console.log('   🛠️ Backend:   http://localhost:8000');
+        console.log('   📡 API:       http://localhost:8000/api');
+        console.log('   💬 Chat:      WebSocket on ws://localhost:8081');
         console.log('\n💡 Press Ctrl+C to stop all services');
         console.log('='.repeat(60));
     }

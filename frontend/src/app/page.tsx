@@ -43,16 +43,16 @@ export default function SimplePage() {
   const transformedNFTs = useMemo(() => {
     return blockchainNFTData.nfts.map((nft) => ({
       tokenId: BigInt(nft.tokenId.replace(/[^0-9]/g, '') || '1'),
-      nftType: {
+        nftType: {
         id: nft.nftType,
         name: nft.name,
         description: `Swiss Energy NFT #${nft.nftType}`,
         energyType: 'Solar' as const,
         rarity: 'Rare' as const,
         image: `/images/nfts/nft-${nft.nftType}.png`
-      },
-      quantity: 1,
-      lastUpdated: new Date(),
+        },
+        quantity: 1,
+        lastUpdated: new Date(),
       originalTokenId: nft.tokenId,
       uniqueId: `blockchain-${nft.tokenId}-${nft.nftType}`
     }))
@@ -358,8 +358,8 @@ export default function SimplePage() {
       )}
 
       
-      {/* Animation Queue Manager */}
-      {isConnected && address && (
+      {/* Animation Queue Manager - Temporarily disabled for chat system testing */}
+      {false && isConnected && address && (
         <AnimationQueueManager
           nfts={transformedNFTs}
           walletAddress={address}

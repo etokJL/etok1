@@ -24,6 +24,8 @@ class User extends Authenticatable
         'password',
         'wallet_address',
         'email_verified_at',
+        'is_active',
+        'eligible_for_airdrops',
     ];
 
     /**
@@ -46,6 +48,42 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'eligible_for_airdrops' => 'boolean',
         ];
+    }
+
+    /**
+     * Get all NFT tokens owned by this user
+     */
+    public function nftTokens()
+    {
+        return $this->hasMany(AppToken::class, 'owner_address', 'wallet_address');
+    }
+
+    /**
+     * Scope for active users only
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope for airdrop eligible users
+     */
+    public function scopeEligibleForAirdrops($query)
+    {
+        return $query->where('eligible_for_airdrops', true)
+                    ->where('is_active', true)
+                    ->whereNotNull('wallet_address');
+    }
+
+    /**
+     * Get display name (name or shortened wallet address)
+     */
+    public function getDisplayNameAttribute()
+    {
+        return $this->name ?: ($this->wallet_address ? substr($this->wallet_address, 0, 6) . '...' . substr($this->wallet_address, -4) : 'Unknown User');
     }
 }

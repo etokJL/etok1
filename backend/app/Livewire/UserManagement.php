@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\AppUser;
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -18,22 +18,22 @@ class UserManagement extends Component
     // Form fields
     public $wallet_address = '';
     public $email = '';
-    public $username = '';
+    public $name = '';
     public $is_active = true;
     public $eligible_for_airdrops = true;
 
     protected $rules = [
-        'wallet_address' => 'required|string|min:42|max:42',
-        'email' => 'nullable|email',
-        'username' => 'nullable|string|max:255',
+        'wallet_address' => 'nullable|string|min:42|max:42',
+        'email' => 'required|email',
+        'name' => 'required|string|max:255',
         'is_active' => 'boolean',
         'eligible_for_airdrops' => 'boolean'
     ];
 
     public function render()
     {
-        $users = AppUser::where('wallet_address', 'like', '%' . $this->search . '%')
-            ->orWhere('username', 'like', '%' . $this->search . '%')
+        $users = User::where('wallet_address', 'like', '%' . $this->search . '%')
+            ->orWhere('name', 'like', '%' . $this->search . '%')
             ->orWhere('email', 'like', '%' . $this->search . '%')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -51,12 +51,12 @@ class UserManagement extends Component
 
     public function openEditModal($userId)
     {
-        $user = AppUser::find($userId);
+        $user = User::find($userId);
         if ($user) {
             $this->selectedUser = $user;
             $this->wallet_address = $user->wallet_address;
             $this->email = $user->email;
-            $this->username = $user->username;
+            $this->name = $user->name;
             $this->is_active = $user->is_active;
             $this->eligible_for_airdrops = $user->eligible_for_airdrops;
             $this->showEditModal = true;
@@ -68,12 +68,13 @@ class UserManagement extends Component
         $this->validate();
 
         try {
-            AppUser::create([
-                'wallet_address' => $this->wallet_address,
-                'email' => $this->email ?: null,
-                'username' => $this->username ?: null,
+            User::create([
+                'name' => $this->name,
+                'email' => $this->email,
+                'wallet_address' => $this->wallet_address ?: null,
                 'is_active' => $this->is_active,
-                'eligible_for_airdrops' => $this->eligible_for_airdrops
+                'eligible_for_airdrops' => $this->eligible_for_airdrops,
+                'password' => bcrypt('password123'), // Default password
             ]);
 
             $this->resetForm();
@@ -90,9 +91,9 @@ class UserManagement extends Component
 
         try {
             $this->selectedUser->update([
-                'wallet_address' => $this->wallet_address,
-                'email' => $this->email ?: null,
-                'username' => $this->username ?: null,
+                'name' => $this->name,
+                'email' => $this->email,
+                'wallet_address' => $this->wallet_address ?: null,
                 'is_active' => $this->is_active,
                 'eligible_for_airdrops' => $this->eligible_for_airdrops
             ]);
@@ -108,7 +109,7 @@ class UserManagement extends Component
     public function deleteUser($userId)
     {
         try {
-            AppUser::find($userId)->delete();
+            User::find($userId)->delete();
             session()->flash('message', 'User deleted successfully!');
         } catch (\Exception $e) {
             session()->flash('error', 'Error deleting user: ' . $e->getMessage());
@@ -117,7 +118,7 @@ class UserManagement extends Component
 
     public function toggleActive($userId)
     {
-        $user = AppUser::find($userId);
+        $user = User::find($userId);
         if ($user) {
             $user->update(['is_active' => !$user->is_active]);
             session()->flash('message', 'User status updated!');
@@ -126,7 +127,7 @@ class UserManagement extends Component
 
     public function toggleAirdropEligibility($userId)
     {
-        $user = AppUser::find($userId);
+        $user = User::find($userId);
         if ($user) {
             $user->update(['eligible_for_airdrops' => !$user->eligible_for_airdrops]);
             session()->flash('message', 'Airdrop eligibility updated!');
@@ -137,7 +138,7 @@ class UserManagement extends Component
     {
         $this->wallet_address = '';
         $this->email = '';
-        $this->username = '';
+        $this->name = '';
         $this->is_active = true;
         $this->eligible_for_airdrops = true;
         $this->selectedUser = null;

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('wallet_address')->nullable()->unique()->after('email');
             $table->boolean('is_active')->default(true)->after('wallet_address');
-            $table->boolean('eligible_for_airdrops')->default(false)->after('is_active');
+            $table->boolean('eligible_for_airdrops')->default(true)->after('is_active');
         });
     }
 

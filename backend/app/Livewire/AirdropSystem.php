@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Airdrop;
-use App\Models\AppUser;
+use App\Models\User;
 use App\Models\AppToken;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -28,7 +28,7 @@ class AirdropSystem extends Component
     public function render()
     {
         $airdrops = Airdrop::orderBy('created_at', 'desc')->paginate(10);
-        $eligibleUsersCount = AppUser::eligibleForAirdrops()->count();
+        $eligibleUsersCount = User::eligibleForAirdrops()->count();
 
         return view('livewire.airdrop-system', [
             'airdrops' => $airdrops,
@@ -51,7 +51,7 @@ class AirdropSystem extends Component
             $nftTypesArray = array_map('trim', explode(',', $this->nft_types));
             $nftTypesArray = array_map('intval', array_filter($nftTypesArray));
 
-            $eligibleUsers = AppUser::eligibleForAirdrops()->count();
+            $eligibleUsers = User::eligibleForAirdrops()->count();
 
             Airdrop::create([
                 'title' => $this->title,
@@ -86,7 +86,7 @@ class AirdropSystem extends Component
             ]);
 
             // Get eligible users
-            $eligibleUsers = AppUser::eligibleForAirdrops()->get();
+            $eligibleUsers = User::eligibleForAirdrops()->get();
 
             // Execute real blockchain airdrop
             $this->executeBlockchainAirdrop($airdrop, $eligibleUsers);
