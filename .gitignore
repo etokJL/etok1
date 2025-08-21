@@ -170,3 +170,7 @@ config/services.php
 # Monitoring and process files
 monitor-fixed.js
 start-system.sh
+
+# Dynamically generated contract files
+frontend/src/contracts.json
+contracts-backup.json

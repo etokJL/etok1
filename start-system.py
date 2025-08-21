@@ -28,7 +28,11 @@ def main():
         print("❌ Please run this script from the booster project root directory")
         sys.exit(1)
 
-    # Services
+    print("🚀 Starting Booster System with automatic contract deployment...")
+    print("⏱️  Timing: Hardhat(0s) → Contracts(5s) → Backend(10s) → Frontend(15s)")
+    print()
+
+    # Services with timing
     services = [
         {
             "title": "⛓️ Hardhat (8545)",
@@ -36,14 +40,19 @@ def main():
             "command": "npx hardhat node"
         },
         {
+            "title": "📦 Contracts",
+            "cwd": PROJECT_ROOT,
+            "command": "sleep 5 && echo '🔄 Deploying contracts...' && npx hardhat run scripts/deploy.js --network localhost && echo '✅ Contracts deployed successfully!'"
+        },
+        {
             "title": "🛠️ Laravel (8282)",
             "cwd": PROJECT_ROOT / "backend",
-            "command": "php artisan serve --host=127.0.0.1 --port=8282"
+            "command": "sleep 10 && echo '🔄 Starting Laravel backend...' && php artisan serve --host=127.0.0.1 --port=8282"
         },
         {
             "title": "🎮 Frontend (3000)",
             "cwd": PROJECT_ROOT / "frontend",
-            "command": "npm run dev"
+            "command": "sleep 15 && echo '🔄 Starting Next.js frontend...' && npm run dev"
         }
     ]
 
