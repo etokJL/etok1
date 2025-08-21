@@ -4,9 +4,13 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+
+# Load environment variables from .env file
+load_dotenv(PROJECT_ROOT / '.env')
 
 
 def open_in_mac_terminal(title: str, command: str, working_dir: Path):
@@ -28,16 +32,22 @@ def main():
         print("❌ Please run this script from the booster project root directory")
         sys.exit(1)
 
+    # Get configuration from environment variables
+    hardhat_port = os.getenv('HARDHAT_PORT', '8545')
+    backend_port = os.getenv('BACKEND_PORT', '8282')
+    frontend_port = os.getenv('FRONTEND_PORT', '3000')
+    backend_host = os.getenv('BACKEND_HOST', '127.0.0.1')
+    
     print("🚀 Starting Booster System with automatic contract deployment...")
-    print("⏱️  Timing: Hardhat(0s) → Contracts(5s) → Backend(10s) → Frontend(15s)")
+    print(f"⏱️  Timing: Hardhat({hardhat_port}) → Contracts(5s) → Backend({backend_port}) → Frontend({frontend_port})")
     print()
 
-    # Services with timing
+    # Services with timing from environment variables
     services = [
         {
-            "title": "⛓️ Hardhat (8545)",
+            "title": f"⛓️ Hardhat ({hardhat_port})",
             "cwd": PROJECT_ROOT,
-            "command": "npx hardhat node"
+            "command": f"npx hardhat node --hostname {os.getenv('HARDHAT_HOST', '127.0.0.1')} --port {hardhat_port}"
         },
         {
             "title": "📦 Contracts",
@@ -45,14 +55,14 @@ def main():
             "command": "sleep 5 && echo '🔄 Deploying contracts...' && npx hardhat run scripts/deploy.js --network localhost && echo '✅ Contracts deployed successfully!'"
         },
         {
-            "title": "🛠️ Laravel (8282)",
+            "title": f"🛠️ Laravel ({backend_port})",
             "cwd": PROJECT_ROOT / "backend",
-            "command": "sleep 10 && echo '🔄 Starting Laravel backend...' && php artisan serve --host=127.0.0.1 --port=8282"
+            "command": f"sleep 10 && echo '🔄 Starting Laravel backend...' && php artisan serve --host={backend_host} --port={backend_port}"
         },
         {
-            "title": "🎮 Frontend (3000)",
+            "title": f"🎮 Frontend ({frontend_port})",
             "cwd": PROJECT_ROOT / "frontend",
-            "command": "sleep 15 && echo '🔄 Starting Next.js frontend...' && npm run dev"
+            "command": f"sleep 15 && echo '🔄 Starting Next.js frontend...' && npm run dev -- --port {frontend_port}"
         }
     ]
 

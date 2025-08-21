@@ -14,8 +14,8 @@ module.exports = {
   },
   networks: {
     localhost: {
-      url: "http://127.0.0.1:8545",
-      chainId: 31337, // Keep Hardhat's default but configure as Polygon-like
+      url: process.env.HARDHAT_URL || "http://127.0.0.1:8545",
+      chainId: parseInt(process.env.CHAIN_ID) || 31337,
       accounts: {
         mnemonic: "test test test test test test test test test test test junk"
       }

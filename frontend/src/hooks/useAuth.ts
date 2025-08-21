@@ -25,6 +25,12 @@ export function useAuth() {
 
   // Check for stored auth data on mount
   useEffect(() => {
+    // Only access localStorage in browser environment
+    if (typeof window === 'undefined') {
+      setLoading(false)
+      return
+    }
+
     const token = localStorage.getItem('auth_token')
     const userData = localStorage.getItem('user_data')
     
@@ -63,8 +69,10 @@ export function useAuth() {
         const { user, token } = data.data
         
         // Store in localStorage
-        localStorage.setItem('auth_token', token)
-        localStorage.setItem('user_data', JSON.stringify(user))
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', token)
+          localStorage.setItem('user_data', JSON.stringify(user))
+        }
         
         setAuthState({
           isAuthenticated: true,
@@ -107,8 +115,10 @@ export function useAuth() {
         const { user, token } = data.data
         
         // Store in localStorage
-        localStorage.setItem('auth_token', token)
-        localStorage.setItem('user_data', JSON.stringify(user))
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', token)
+          localStorage.setItem('user_data', JSON.stringify(user))
+        }
         
         setAuthState({
           isAuthenticated: true,
@@ -148,8 +158,10 @@ export function useAuth() {
       console.error('Logout error:', error)
     } finally {
       // Clear local storage and state regardless of API call success
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('user_data')
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('user_data')
+      }
       
       setAuthState({
         isAuthenticated: false,
@@ -160,7 +172,9 @@ export function useAuth() {
   }
 
   const updateUser = (updatedUser: User) => {
-    localStorage.setItem('user_data', JSON.stringify(updatedUser))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user_data', JSON.stringify(updatedUser))
+    }
     setAuthState(prev => ({
       ...prev,
       user: updatedUser

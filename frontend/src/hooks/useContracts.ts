@@ -65,6 +65,7 @@ export function usePlantToken() {
   const { address } = useAccount()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { contracts: dynamicContracts } = useDynamicContracts()
 
   // Mock data for demonstration
   const userPlants = [BigInt(1), BigInt(2)] // Mock plant token IDs
@@ -73,7 +74,7 @@ export function usePlantToken() {
   const handleCreatePlant = useCallback(async (plantName: string) => {
     console.log('🔗 handleCreatePlant called with:', plantName)
     console.log('Address:', address)
-    console.log('Contract address:', contracts.PlantToken.address)
+    console.log('Contract address:', dynamicContracts?.PlantToken?.address)
     
     if (!address) {
       console.error('❌ Wallet not connected')
@@ -88,24 +89,24 @@ export function usePlantToken() {
     try {
       console.log('📝 MINIMAL TEST APPROACH')
       console.log('========================')
-      console.log('PlantToken address:', contracts.PlantToken.address)
+      console.log('PlantToken address:', dynamicContracts?.PlantToken?.address)
       console.log('PlantName argument:', plantName)
       console.log('User address:', address)
       
       // Debug: Log ABI to see what we're working with
-      console.log('Contract ABI type:', typeof contracts.PlantToken.abi)
-      console.log('First ABI entry:', contracts.PlantToken.abi[0])
+      console.log('Contract ABI type:', typeof dynamicContracts?.PlantToken?.abi)
+      console.log('First ABI entry:', dynamicContracts?.PlantToken?.abi?.[0])
       
       // Find the createPlant function in ABI
-      const createPlantABI = contracts.PlantToken.abi.find(
+      const createPlantABI = dynamicContracts?.PlantToken?.abi?.find(
         (item: any) => item.type === 'function' && item.name === 'createPlant'
       )
       console.log('CreatePlant ABI:', createPlantABI)
       
       console.log('🚀 Attempting writeContract...')
       const hash = await writeContract(config, {
-        address: contracts.PlantToken.address as `0x${string}`,
-        abi: contracts.PlantToken.abi,
+        address: dynamicContracts?.PlantToken?.address as `0x${string}`,
+        abi: dynamicContracts?.PlantToken?.abi || [],
         functionName: 'createPlant',
         args: [plantName],
       })

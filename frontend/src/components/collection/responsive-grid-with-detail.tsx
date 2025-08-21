@@ -101,7 +101,7 @@ export function ResponsiveGridWithDetail({ nfts, onNFTSelect }: ResponsiveGridWi
       y: 0,
       transition: { 
         duration: 0.4,
-        ease: [0.23, 1, 0.320, 1] // easeOutQuart
+        ease: [0.23, 1, 0.320, 1] as const // easeOutQuart
       }
     },
     exit: { 
@@ -110,7 +110,7 @@ export function ResponsiveGridWithDetail({ nfts, onNFTSelect }: ResponsiveGridWi
       y: 50,
       transition: { 
         duration: 0.3,
-        ease: [0.76, 0, 0.24, 1] // easeInQuart
+        ease: [0.76, 0, 0.24, 1] as const // easeInQuart
       }
     }
   }

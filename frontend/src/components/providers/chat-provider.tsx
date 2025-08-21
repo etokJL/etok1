@@ -19,7 +19,7 @@ export function ChatProvider() {
         name: user.name,
         email: user.email
       } : null}
-      authToken={token}
+      authToken={token || undefined}
     />
   )
 }

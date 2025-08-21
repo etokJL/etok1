@@ -56,6 +56,13 @@ export function ContractStatus() {
             >
               {isReloading ? 'Reloading...' : 'Reload'}
             </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+              title="Force page reload"
+            >
+              🔄
+            </button>
           </div>
         </div>
 

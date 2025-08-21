@@ -170,3 +170,9 @@ config/services.php
 # Dynamically generated contract files
 frontend/src/contracts.json
 contracts-backup.json
+
+# Environment files (now using central config)
+.env
+backend/.env
+frontend/.env.local
+.env.local

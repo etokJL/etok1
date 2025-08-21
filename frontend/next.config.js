@@ -1,92 +1,33 @@
+const path = require('path')
+
+// Load environment variables from parent directory
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    // Make environment variables available to the frontend
+    NEXT_PUBLIC_BACKEND_URL: process.env.BACKEND_URL,
+    NEXT_PUBLIC_BACKEND_API_URL: process.env.BACKEND_API_URL,
+    NEXT_PUBLIC_HARDHAT_URL: process.env.HARDHAT_URL,
+    NEXT_PUBLIC_WEBSOCKET_URL: process.env.WEBSOCKET_URL,
+    NEXT_PUBLIC_CHAIN_ID: process.env.CHAIN_ID,
+    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: process.env.WALLETCONNECT_PROJECT_ID,
+  },
   experimental: {
-    // Enable Turbopack for faster builds (stable in Next.js 15)
-    turbo: {
-      rules: {
-        '*.svg': ['@svgr/webpack'],
-      },
-    },
+    // Remove deprecated turbo config if it exists
   },
-  
-  // Image domains for NFT images
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'ipfs.io',
-        port: '',
-        pathname: '/ipfs/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.ipfs.dweb.link',
-        port: '',
-        pathname: '**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'gateway.pinata.cloud',
-        port: '',
-        pathname: '/ipfs/**',
-      },
-    ],
-  },
-
-  // Webpack configuration for better performance
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      }
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Webpack configuration for Web3 libraries
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
     }
     
-    // Support for SVG imports
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ['@svgr/webpack'],
-    })
-
     return config
-  },
-
-  // Performance optimizations
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-
-  // PWA and performance settings
-  poweredByHeader: false,
-  compress: true,
-  
-  // Headers for security and performance
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
-        ],
-      },
-    ]
   },
 }
 

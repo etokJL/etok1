@@ -11,7 +11,7 @@ interface USDTBalanceProps {
 }
 
 export function USDTBalance({ balance, formatUSDT, onGetFaucet, isProcessing }: USDTBalanceProps) {
-  const needsFaucet = balance < 10n * 10n**6n // Less than 10 USDT
+  const needsFaucet = balance < BigInt(10) * BigInt(10)**BigInt(6) // Less than 10 USDT
 
   return (
     <motion.div

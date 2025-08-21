@@ -11,7 +11,7 @@ import { TradingInterface } from '@/components/trading/trading-interface'
 import { useContracts } from '@/hooks/useContracts'
 import { useBlockchainNFTData, useBlockchainPlantData, useCanCreatePlant } from '@/hooks/useBlockchainData'
 import { useAutoConnect } from '@/hooks/useAutoConnect'
-import { AnimationQueueManager } from '@/components/animations/animation-queue-manager'
+
 import { PageTemplate } from '@/components/layout/page-template'
 import { PageHeader } from '@/components/layout/page-header'
 
@@ -211,7 +211,9 @@ export default function SimplePage() {
               transition={{ delay: 2 }}
               onClick={() => {
                 // Force stop auto-connect and show manual connection
-                localStorage.setItem('skipAutoConnect', 'true')
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('skipAutoConnect', 'true')
+                }
                 window.location.reload()
               }}
             >
@@ -358,16 +360,7 @@ export default function SimplePage() {
       )}
 
       
-      {/* Animation Queue Manager - Temporarily disabled for chat system testing */}
-      {false && isConnected && address && (
-        <AnimationQueueManager
-          nfts={transformedNFTs}
-          walletAddress={address}
-          onAnimationComplete={(animation) => {
-            console.log('Animation completed:', animation.type, animation.nft.nftType.name)
-          }}
-        />
-      )}
+      {/* Animation system removed - NFTs no longer animate on mint/burn */}
 
       {/* Pure blockchain error handling is done in individual components */}
     </motion.div>

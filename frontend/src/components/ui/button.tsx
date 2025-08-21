@@ -79,17 +79,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           {loading ? loadingText : children as React.ReactNode}
         </span>
         
-        {/* Quality indicator for swiss variant */}
-        {variant === 'swiss' && (
-          <motion.div
-            className="absolute -top-1 -right-1 text-xs"
-            initial={{ scale: 0, rotate: -12 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-          >
-            
-          </motion.div>
-        )}
+
       </motion.button>
     )
   }

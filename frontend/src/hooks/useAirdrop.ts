@@ -46,6 +46,7 @@ export function useAirdrop() {
         address: dynamicContracts.QuestNFT.address as `0x${string}`,
         abi: dynamicContracts.QuestNFT.abi,
         functionName: 'createWeeklyPackage',
+        args: [],
       })
 
       // Wait for package creation
@@ -96,6 +97,7 @@ export function useAirdrop() {
         address: dynamicContracts.QuestNFT.address as `0x${string}`,
         abi: dynamicContracts.QuestNFT.abi,
         functionName: 'createWeeklyPackage',
+        args: [],
       })
 
       return true

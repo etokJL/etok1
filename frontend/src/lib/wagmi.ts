@@ -34,8 +34,9 @@ const createConnectors = () => {
     metaMask(),
   ]
 
-  // Only add WalletConnect if we have a valid project ID
-  if (projectId && projectId !== 'demo-project-id') {
+  // Skip WalletConnect in development to avoid connection errors
+  // Only add WalletConnect if we have a valid project ID (not placeholder)
+  if (projectId && projectId !== 'demo-project-id' && projectId !== 'your-walletconnect-project-id' && process.env.NODE_ENV === 'production') {
     connectors.push(
       walletConnect({
         projectId,

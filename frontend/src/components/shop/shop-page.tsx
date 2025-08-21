@@ -116,7 +116,7 @@ export function ShopPage() {
       {/* USDT Balance & Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <USDTBalance 
-          balance={usdtBalance}
+          balance={usdtBalance as bigint || BigInt(0)}
           formatUSDT={formatUSDT}
           onGetFaucet={getUSDTFromFaucet}
           isProcessing={isProcessing}
@@ -171,7 +171,7 @@ export function ShopPage() {
             <ShopCard
               title="Random Quest Package"
               description="Get 5 random Quest NFTs in one package"
-              price={prices?.questNFTPackagePrice || 0n}
+              price={prices?.questNFTPackagePrice || BigInt(0)}
               formatPrice={formatUSDT}
               canAfford={canAfford(0)}
               isProcessing={isProcessing}
@@ -254,7 +254,7 @@ export function ShopPage() {
             <ShopCard
               title="Plant Token"
               description="Create your own energy plant (requires all 15 Quest NFT types)"
-              price={prices?.plantTokenPrice || 0n}
+              price={prices?.plantTokenPrice || BigInt(0)}
               formatPrice={formatUSDT}
               canAfford={canAfford(2)}
               isProcessing={isProcessing}

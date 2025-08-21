@@ -29,9 +29,11 @@ interface DeploymentCheck {
   contracts?: string[]
 }
 
-const CONTRACTS_ENDPOINT = `${process.env.NEXT_PUBLIC_API_URL}/contracts`
-const CHECK_ENDPOINT = `${process.env.NEXT_PUBLIC_API_URL}/contracts/check`
-const RELOAD_ENDPOINT = `${process.env.NEXT_PUBLIC_API_URL}/contracts/reload`
+import { getApiUrl } from '../config/app.config'
+
+const CONTRACTS_ENDPOINT = getApiUrl('/contracts')
+const CHECK_ENDPOINT = getApiUrl('/contracts/check')
+const RELOAD_ENDPOINT = getApiUrl('/contracts/reload')
 
 export function useDynamicContracts() {
   const [contracts, setContracts] = useState<DynamicContracts | null>(null)
@@ -78,6 +80,14 @@ export function useDynamicContracts() {
         PlantToken: data.contracts.PlantToken.address,
         MockUSDT: data.contracts.MockUSDT.address,
         NFTShop: data.contracts.NFTShop.address,
+      })
+
+      // Also log the ABIs to verify they're loaded
+      console.log('📋 Contract ABIs loaded:', {
+        QuestNFT: !!data.contracts.QuestNFT.abi,
+        PlantToken: !!data.contracts.PlantToken.abi,
+        MockUSDT: !!data.contracts.MockUSDT.abi,
+        NFTShop: !!data.contracts.NFTShop.abi,
       })
 
       setContracts(data.contracts)

@@ -14,6 +14,7 @@ import { useChatSimple } from '@/hooks/useChatSimple';
 interface User {
   id: number;
   name: string;
+  email?: string;
 }
 
 interface WebSocketChatSystemProps {

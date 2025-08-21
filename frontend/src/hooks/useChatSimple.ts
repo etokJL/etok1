@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { getApiUrl } from '../config/app.config';
 
 interface ChatMessage {
   id: number;
@@ -44,7 +45,7 @@ export function useChatSimple({ channel = 'general', authToken }: UseChatSimpleO
         headers['Authorization'] = `Bearer ${authToken}`;
       }
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/chat/messages?channel=${channel}`, {
+      const response = await fetch(`${getApiUrl('/chat/messages')}?channel=${channel}`, {
         headers,
       });
 
@@ -72,7 +73,7 @@ export function useChatSimple({ channel = 'general', authToken }: UseChatSimpleO
         headers['Authorization'] = `Bearer ${authToken}`;
       }
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/chat/users`, {
+      const response = await fetch(`${getApiUrl('/chat/users')}`, {
         headers,
       });
 

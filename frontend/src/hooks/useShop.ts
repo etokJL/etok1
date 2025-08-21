@@ -122,17 +122,17 @@ export function useShop() {
     }
   })
 
-  const prices: ShopPrices | null = pricesData ? {
-    questNFTPackagePrice: pricesData[0],
-    singleQuestNFTPrice: pricesData[1],
-    plantTokenPrice: pricesData[2]
+  const prices: ShopPrices | null = pricesData && Array.isArray(pricesData) ? {
+    questNFTPackagePrice: pricesData[0] as bigint,
+    singleQuestNFTPrice: pricesData[1] as bigint,
+    plantTokenPrice: pricesData[2] as bigint
   } : null
 
-  const shopStats: ShopStats | null = shopStatsData ? {
-    totalSales: shopStatsData[0],
-    totalQuestNFTsSold: shopStatsData[1],
-    totalPlantTokensSold: shopStatsData[2],
-    currentUSDTBalance: shopStatsData[3]
+  const shopStats: ShopStats | null = shopStatsData && Array.isArray(shopStatsData) ? {
+    totalSales: shopStatsData[0] as bigint,
+    totalQuestNFTsSold: shopStatsData[1] as bigint,
+    totalPlantTokensSold: shopStatsData[2] as bigint,
+    currentUSDTBalance: shopStatsData[3] as bigint
   } : null
 
   // Format USDT amounts for display
@@ -152,21 +152,28 @@ export function useShop() {
       default: return false
     }
     
-    return usdtBalance >= requiredAmount
+    return (usdtBalance as bigint) >= requiredAmount
   }, [address, usdtBalance, prices])
 
   // Approve USDT spending
   const approveUSDT = useCallback(async (amount: bigint) => {
     if (!address) throw new Error('Wallet not connected')
 
-    // More robust contract loading check
+    // More robust contract loading check with detailed debugging
     if (!dynamicContracts?.MockUSDT?.address || !dynamicContracts?.NFTShop?.address || 
         !dynamicContracts?.MockUSDT?.abi || !dynamicContracts?.NFTShop?.abi) {
       console.log('⏳ Contracts not fully loaded yet. Missing:', {
         mockUSDTAddress: !!dynamicContracts?.MockUSDT?.address,
         nftShopAddress: !!dynamicContracts?.NFTShop?.address,
         mockUSDTAbi: !!dynamicContracts?.MockUSDT?.abi,
-        nftShopAbi: !!dynamicContracts?.NFTShop?.abi
+        nftShopAbi: !!dynamicContracts?.NFTShop?.abi,
+        contractsLoading,
+        deployed,
+        hasDynamicContracts: !!dynamicContracts,
+        actualAddresses: {
+          MockUSDT: dynamicContracts?.MockUSDT?.address || 'MISSING',
+          NFTShop: dynamicContracts?.NFTShop?.address || 'MISSING'
+        }
       })
       
       // Wait a bit and try to reload contracts
@@ -211,6 +218,7 @@ export function useShop() {
         address: dynamicContracts.MockUSDT.address as `0x${string}`,
         abi: dynamicContracts.MockUSDT.abi,
         functionName: 'faucet',
+        args: [],
       })
       
       console.log('✅ USDT faucet transaction submitted:', result)
@@ -238,8 +246,8 @@ export function useShop() {
       setIsProcessing(true)
       
       // Check allowance
-      if (!allowance || allowance < prices.questNFTPackagePrice) {
-        await approveUSDT(prices.questNFTPackagePrice * 2n) // Approve double for future transactions
+      if (!allowance || (allowance as bigint) < prices.questNFTPackagePrice) {
+        await approveUSDT(prices.questNFTPackagePrice * BigInt(2)) // Approve double for future transactions
         await refetchAllowance()
       }
       
@@ -251,6 +259,7 @@ export function useShop() {
         address: dynamicContracts.NFTShop.address as `0x${string}`,
         abi: dynamicContracts.NFTShop.abi,
         functionName: 'purchaseQuestNFTPackage',
+        args: [],
       })
       
       console.log('✅ NFT Package Purchase submitted:', result)
@@ -300,8 +309,8 @@ export function useShop() {
       setIsProcessing(true)
       
       // Check allowance
-      if (!allowance || allowance < prices.singleQuestNFTPrice) {
-        await approveUSDT(prices.singleQuestNFTPrice * 10n) // Approve for multiple purchases
+      if (!allowance || (allowance as bigint) < prices.singleQuestNFTPrice) {
+        await approveUSDT(prices.singleQuestNFTPrice * BigInt(10)) // Approve for multiple purchases
         await refetchAllowance()
       }
       
@@ -363,7 +372,7 @@ export function useShop() {
       setIsProcessing(true)
       
       // Check allowance
-      if (!allowance || allowance < prices.plantTokenPrice) {
+      if (!allowance || (allowance as bigint) < prices.plantTokenPrice) {
         await approveUSDT(prices.plantTokenPrice)
         await refetchAllowance()
       }
@@ -430,8 +439,8 @@ export function useShop() {
     // Data
     prices,
     shopStats,
-    usdtBalance: usdtBalance || 0n,
-    allowance: allowance || 0n,
+    usdtBalance: usdtBalance || BigInt(0),
+    allowance: allowance || BigInt(0),
     
     // States
     isProcessing: isProcessing || isPending || isConfirming || contractsLoading,
@@ -439,12 +448,27 @@ export function useShop() {
     showSuccessModal,
     lastPurchase,
     
-    // Contract status - more thorough check
-    contractsLoaded: !!dynamicContracts && 
+    // Contract status - more thorough check with better logging
+    contractsLoaded: (() => {
+      const loaded = !!dynamicContracts && 
                     !!dynamicContracts.NFTShop?.address && !!dynamicContracts.NFTShop?.abi &&
                     !!dynamicContracts.MockUSDT?.address && !!dynamicContracts.MockUSDT?.abi &&
                     !!dynamicContracts.QuestNFT?.address && !!dynamicContracts.QuestNFT?.abi &&
-                    !contractsLoading,
+                    !contractsLoading && deployed;
+      
+      if (!loaded) {
+        console.log('🔍 Contracts loading status:', {
+          hasDynamicContracts: !!dynamicContracts,
+          hasNFTShop: !!dynamicContracts?.NFTShop?.address && !!dynamicContracts?.NFTShop?.abi,
+          hasMockUSDT: !!dynamicContracts?.MockUSDT?.address && !!dynamicContracts?.MockUSDT?.abi,
+          hasQuestNFT: !!dynamicContracts?.QuestNFT?.address && !!dynamicContracts?.QuestNFT?.abi,
+          contractsLoading,
+          deployed
+        });
+      }
+      
+      return loaded;
+    })(),
     contractsError,
     
     // Actions (all enabled, but with proper contract loading checks)

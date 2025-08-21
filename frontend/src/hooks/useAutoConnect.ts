@@ -28,7 +28,7 @@ export function useAutoConnect() {
           }
 
           // Wenn localStorage einen bevorzugten Wallet-Connector gespeichert hat, diesen zuerst versuchen
-          const preferred = localStorage.getItem('booster-preferred-wallet')
+          const preferred = typeof window !== 'undefined' ? localStorage.getItem('booster-preferred-wallet') : null
           // Prefer injected (MetaMask) if available, otherwise first available connector
           const injected = connectors.find(c => c.id === 'io.metamask' || c.type === 'injected')
           const target = connectors.find(c => c.id === preferred) || injected || connectors[0]
@@ -54,8 +54,8 @@ export function useAutoConnect() {
         // mark skipAutoConnect and reload once to show manual connector list immediately.
         try {
           if (typeof window !== 'undefined' && !isConnected) {
-            const alreadySet = localStorage.getItem('skipAutoConnect') === 'true'
-            if (!alreadySet) {
+            const alreadySet = typeof window !== 'undefined' && localStorage.getItem('skipAutoConnect') === 'true'
+            if (!alreadySet && typeof window !== 'undefined') {
               localStorage.setItem('skipAutoConnect', 'true')
               window.location.reload()
             }
@@ -73,7 +73,9 @@ export function useAutoConnect() {
       // If user chose to skip auto-connect, mark as attempted immediately
       setHasAttempted(true)
       // Clear the skip flag for next time
-      localStorage.removeItem('skipAutoConnect')
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('skipAutoConnect')
+      }
     }
   }, [hasAttempted, isConnected, isConnecting, connect, connectors])
 

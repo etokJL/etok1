@@ -9,13 +9,6 @@ export interface ClientSession {
   walletAddress?: string
 }
 
-export interface NFTAnimationStatus {
-  tokenId: string
-  tokenType: 'nft' | 'token'
-  needsMintAnimation: boolean
-  needsBurnAnimation: boolean
-  lastAnimationShown?: Date
-}
 
 const SESSION_COOKIE_NAME = 'booster_client_session'
 const SESSION_STORAGE_KEY = 'booster_session_data'
@@ -117,7 +110,7 @@ class ClientSessionManager {
    * Lädt bestehende Session-Daten oder erstellt neue
    */
   private loadOrCreateSessionData(sessionId: string): ClientSession {
-    const stored = localStorage.getItem(SESSION_STORAGE_KEY)
+    const stored = typeof window !== 'undefined' ? localStorage.getItem(SESSION_STORAGE_KEY) : null
     
     if (stored) {
       try {
@@ -147,7 +140,8 @@ class ClientSessionManager {
   private saveSessionData(): void {
     if (!this.session || typeof localStorage === 'undefined') return
     
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
       sessionId: this.session.sessionId,
       createdAt: this.session.createdAt.toISOString(),
       lastSeen: this.session.lastSeen.toISOString(),
@@ -156,97 +150,5 @@ class ClientSessionManager {
   }
 }
 
-/**
- * NFT Animation Status Management
- */
-class NFTAnimationManager {
-  private static readonly ANIMATION_STATUS_KEY = 'booster_nft_animations'
-
-  /**
-   * Lädt Animation Status für alle NFTs
-   */
-  static getAnimationStatuses(): Record<string, NFTAnimationStatus> {
-    if (typeof localStorage === 'undefined') return {}
-    
-    const stored = localStorage.getItem(this.ANIMATION_STATUS_KEY)
-    if (stored) {
-      try {
-        const data = JSON.parse(stored)
-        // Konvertiere Datum-Strings zurück zu Date-Objekten
-        Object.values(data).forEach((status: any) => {
-          if (status.lastAnimationShown) {
-            status.lastAnimationShown = new Date(status.lastAnimationShown)
-          }
-        })
-        return data
-      } catch (e) {
-        console.warn('Failed to parse animation statuses:', e)
-      }
-    }
-    return {}
-  }
-
-  /**
-   * Holt Animation Status für spezifisches NFT
-   */
-  static getAnimationStatus(tokenId: string, tokenType: 'nft' | 'token'): NFTAnimationStatus | null {
-    const statuses = this.getAnimationStatuses()
-    const key = `${tokenType}_${tokenId}`
-    return statuses[key] || null
-  }
-
-  /**
-   * Setzt Animation Status für NFT
-   */
-  static setAnimationStatus(status: NFTAnimationStatus): void {
-    const statuses = this.getAnimationStatuses()
-    const key = `${status.tokenType}_${status.tokenId}`
-    statuses[key] = status
-    this.saveAnimationStatuses(statuses)
-  }
-
-  /**
-   * Markiert Mint-Animation als gezeigt
-   */
-  static markMintAnimationShown(tokenId: string, tokenType: 'nft' | 'token'): void {
-    const status = this.getAnimationStatus(tokenId, tokenType) || {
-      tokenId,
-      tokenType,
-      needsMintAnimation: false,
-      needsBurnAnimation: false
-    }
-    
-    status.needsMintAnimation = false
-    status.lastAnimationShown = new Date()
-    this.setAnimationStatus(status)
-  }
-
-  /**
-   * Markiert Burn-Animation als gezeigt
-   */
-  static markBurnAnimationShown(tokenId: string, tokenType: 'nft' | 'token'): void {
-    const status = this.getAnimationStatus(tokenId, tokenType) || {
-      tokenId,
-      tokenType,
-      needsMintAnimation: false,
-      needsBurnAnimation: false
-    }
-    
-    status.needsBurnAnimation = false
-    status.lastAnimationShown = new Date()
-    this.setAnimationStatus(status)
-  }
-
-  /**
-   * Speichert alle Animation Statuses
-   */
-  private static saveAnimationStatuses(statuses: Record<string, NFTAnimationStatus>): void {
-    if (typeof localStorage === 'undefined') return
-    localStorage.setItem(this.ANIMATION_STATUS_KEY, JSON.stringify(statuses))
-  }
-}
-
 // Singleton Instance
 export const clientSessionManager = new ClientSessionManager()
-export { NFTAnimationManager }
-

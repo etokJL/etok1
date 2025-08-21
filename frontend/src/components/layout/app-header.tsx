@@ -79,7 +79,7 @@ export function AppHeader({ currentPage = 'collection' }: AppHeaderProps) {
             <motion.div
               className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-sm border text-primary border-primary/30 bg-primary/10"
               animate={{ rotate: [0, 1, -1, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" as const }}
             >
               <span className="font-medium">Quality</span>
             </motion.div>

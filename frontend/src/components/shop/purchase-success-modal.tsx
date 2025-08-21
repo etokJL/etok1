@@ -40,7 +40,9 @@ const NFT_RARITIES: { [key: number]: string } = {
   14: 'epic', 15: 'legendary'
 }
 
-const RARITY_COLORS = {
+type RarityType = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+
+const RARITY_COLORS: Record<RarityType, string> = {
   common: 'from-gray-400 to-gray-600',
   uncommon: 'from-green-400 to-green-600',
   rare: 'from-blue-400 to-blue-600',
@@ -48,7 +50,7 @@ const RARITY_COLORS = {
   legendary: 'from-yellow-400 to-orange-500'
 }
 
-const RARITY_GLOW = {
+const RARITY_GLOW: Record<RarityType, string> = {
   common: 'shadow-lg',
   uncommon: 'shadow-green-500/50',
   rare: 'shadow-blue-500/50',
@@ -188,7 +190,7 @@ export function PurchaseSuccessModal({
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {nftsToShow.map((nftType, index) => {
-                      const rarity = NFT_RARITIES[nftType]
+                      const rarity = NFT_RARITIES[nftType] as RarityType
                       
                       return (
                         <motion.div

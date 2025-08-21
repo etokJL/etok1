@@ -41,7 +41,7 @@ export function useChat({ channel = 'general', authToken }: UseChatOptions) {
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const echoRef = useRef<Echo | null>(null);
+  const echoRef = useRef<typeof Echo | null>(null);
 
   // Initialize Echo connection
   useEffect(() => {
@@ -181,7 +181,7 @@ export function useChat({ channel = 'general', authToken }: UseChatOptions) {
       hasAuthToken: !!authToken,
       authTokenLength: authToken?.length,
       content: content.trim(),
-      hasCurrentUser: !!currentUser
+      hasCurrentUser: false // currentUser not available in this scope
     });
     
     if (!authToken || !content.trim()) {
