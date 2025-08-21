@@ -1,28 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
-import { parseAbi, formatUnits, parseUnits } from 'viem'
+import { formatUnits } from 'viem'
 import { useDynamicContracts } from './useDynamicContracts'
 
-// Contract ABIs
-const shopAbi = parseAbi([
-  'function purchaseQuestNFTPackage() external',
-  'function purchaseSingleQuestNFT(uint256 nftType) external',
-  'function purchasePlantToken(string memory plantName) external',
-  'function getPrices() external view returns (uint256, uint256, uint256)',
-  'function canAfford(address user, uint256 itemType) external view returns (bool)',
-  'function getShopStats() external view returns (uint256, uint256, uint256, uint256)',
-  'event QuestNFTPackagePurchased(address indexed buyer, uint256 packageId, uint256 price)',
-  'event SingleQuestNFTPurchased(address indexed buyer, uint256 nftType, uint256 price)',
-  'event PlantTokenPurchased(address indexed buyer, string plantName, uint256 tokenId, uint256 price)'
-])
-
-const usdtAbi = parseAbi([
-  'function balanceOf(address account) external view returns (uint256)',
-  'function approve(address spender, uint256 amount) external returns (bool)',
-  'function allowance(address owner, address spender) external view returns (uint256)',
-  'function faucet() external',
-  'function balanceOfFormatted(address account) external view returns (string)'
-])
+// Note: We use dynamic contract ABIs from the backend instead of static ABIs
 
 interface ShopPrices {
   questNFTPackagePrice: bigint
@@ -199,7 +180,7 @@ export function useShop() {
     } finally {
       setIsProcessing(false)
     }
-  }, [address, writeContract])
+  }, [address, writeContract, dynamicContracts, contractsLoading, deployed])
 
   // Get USDT from faucet
   const getUSDTFromFaucet = useCallback(async () => {
@@ -235,7 +216,7 @@ export function useShop() {
       setError(err instanceof Error ? err.message : 'Failed to get USDT from faucet')
       throw err
     }
-  }, [address, writeContract, dynamicContracts])
+  }, [address, writeContract, dynamicContracts, refetchBalance])
 
   // Purchase Quest NFT package
   const purchaseQuestNFTPackage = useCallback(async () => {
