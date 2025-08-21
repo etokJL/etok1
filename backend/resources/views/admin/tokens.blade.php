@@ -3,37 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Token Management - Booster Admin</title>
+    <title>Token Management - Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     @livewireStyles
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen">
-        <!-- Navigation -->
-        <nav class="bg-blue-600 text-white p-4">
-            <div class="container mx-auto flex justify-between items-center">
-                <h1 class="text-xl font-bold">🌱 Booster NFT dApp - Admin Panel</h1>
-                <div class="flex space-x-4">
-                    <a href="/admin" class="hover:bg-blue-700 px-3 py-2 rounded">Dashboard</a>
-                    <a href="/admin/users" class="hover:bg-blue-700 px-3 py-2 rounded">Users</a>
-                    <a href="/admin/tokens" class="bg-blue-800 px-3 py-2 rounded">Tokens</a>
-                    <a href="/admin/airdrops" class="hover:bg-blue-700 px-3 py-2 rounded">Airdrops</a>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="bg-blue-600 rounded-lg p-2 mr-3">
+                        <i class="fas fa-shield-alt text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">Admin Panel</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/admin" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-arrow-left mr-1"></i>Back to Dashboard
+                    </a>
+                    <form method="POST" action="{{ route('admin.logout') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors text-sm">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </button>
+                    </form>
                 </div>
             </div>
-        </nav>
+        </div>
+    </nav>
 
-        <!-- Main Content -->
-        <div class="container mx-auto p-6">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">🎮 Token Management</h2>
-                    <div class="flex space-x-2">
-                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">ERC721A NFTs</span>
-                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">ERC1155 Plants</span>
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">
+                            <i class="fas fa-coins text-green-600 mr-2"></i>NFT Token Management
+                        </h1>
+                        <p class="text-gray-600 mt-1">View and manage NFT tokens in the system</p>
                     </div>
                 </div>
+            </div>
 
+            <!-- Livewire Component -->
+            <div class="p-6">
                 @livewire('token-management')
             </div>
         </div>

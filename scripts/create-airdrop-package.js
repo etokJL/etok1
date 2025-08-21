@@ -1,4 +1,6 @@
 const { ethers } = require("hardhat");
+const fs = require("fs");
+const path = require("path");
 
 async function main() {
   // Hardcoded for testing - in production, pass via environment variables
@@ -13,8 +15,25 @@ async function main() {
   console.log(`NFT Types: ${nftTypes.join(', ')}`);
 
   try {
-    // Get the deployed QuestNFT contract (NEW ADDRESS)
-    const questNFT = await ethers.getContractAt("QuestNFT", "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570");
+    // Load contract address dynamically from frontend contracts.json
+    const contractsPath = path.join(__dirname, "../frontend/src/contracts.json");
+    console.log(`Loading contracts from: ${contractsPath}`);
+    
+    if (!fs.existsSync(contractsPath)) {
+      throw new Error(`Contracts file not found at: ${contractsPath}`);
+    }
+    
+    const contractsData = JSON.parse(fs.readFileSync(contractsPath, 'utf8'));
+    
+    if (!contractsData.QuestNFT || !contractsData.QuestNFT.address) {
+      throw new Error("QuestNFT contract address not found in contracts.json");
+    }
+    
+    const questNFTAddress = contractsData.QuestNFT.address;
+    console.log(`Using QuestNFT address from contracts.json: ${questNFTAddress}`);
+    
+    // Get the deployed QuestNFT contract with dynamic address
+    const questNFT = await ethers.getContractAt("QuestNFT", questNFTAddress);
     
     console.log(`Contract: ${questNFT.target}`);
     console.log();

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Airdrop;
 use App\Models\User;
 use App\Models\AppToken;
+use App\Services\ContractService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -106,7 +107,15 @@ class AirdropSystem extends Component
         // REAL blockchain interaction - create actual NFT packages on-chain
         $totalUsers = $eligibleUsers->count();
         $completedUsers = 0;
-        $contractAddress = '0x36C02dA8a0983159322a80FFE9F24b1acfF8B570'; // FINAL QuestNFT contract with working createCustomPackage
+
+        try {
+            // Get QuestNFT contract address dynamically from frontend contracts.json
+            $contractAddress = ContractService::getContractAddress('QuestNFT');
+            \Log::info("Using QuestNFT contract address from contracts.json: {$contractAddress}");
+        } catch (\Exception $e) {
+            \Log::error("Failed to get QuestNFT contract address: " . $e->getMessage());
+            throw new \Exception("Cannot execute airdrop: Contract address not available. " . $e->getMessage());
+        }
 
         // NOTE: This method should be called via a job queue for real blockchain interaction
         // For now, we'll create a command that can be run manually or via queue
@@ -178,7 +187,7 @@ class AirdropSystem extends Component
 
             // Command to execute Hardhat script for package creation (with absolute paths)
             // Use --network localhost to connect to persistent node
-            $command = "cd " . base_path('../') . " && /Users/jgtcdghun/.nvm/versions/node/v20.19.2/bin/npx hardhat run scripts/create-airdrop-package.js --network localhost";
+            $command = "cd " . base_path('../') . " && /Users/jgtcdghun/.nvm/versions/node/v20.19.2/bin/npx hardhat run scripts/create-airdrop-via-shop.js --network localhost";
 
             \Log::info("Executing blockchain airdrop command: {$command}");
             \Log::info("Environment variables: " . json_encode($env));
