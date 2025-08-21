@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
+import { readContract } from 'wagmi/actions'
+import { config } from '@/lib/wagmi'
 import { formatUnits } from 'viem'
 import { useDynamicContracts } from './useDynamicContracts'
 
@@ -33,6 +35,7 @@ export function useShop() {
       nftType?: number
       nftTypes?: number[]
       plantName?: string
+      beforeCounts?: number[] // For tracking NFT counts before package purchase
     }
   } | null>(null)
   const [processedTransactionHash, setProcessedTransactionHash] = useState<string | null>(null)
@@ -41,11 +44,72 @@ export function useShop() {
   useEffect(() => {
     if (isSuccess && lastPurchase && !showSuccessModal && hash && hash !== processedTransactionHash) {
       console.log('✅ Transaction confirmed! Showing success modal for hash:', hash)
+      
+      // For package purchases, fetch the actual received NFTs
+      if (lastPurchase.type === 'package' && lastPurchase.items?.beforeCounts && dynamicContracts?.QuestNFT) {
+        const fetchActualNFTs = async () => {
+          try {
+            console.log('🔍 Fetching actual received NFTs after package purchase...')
+            
+            if (!dynamicContracts.QuestNFT.address || !address) return
+            
+            const afterCounts = await readContract(config, {
+              address: dynamicContracts.QuestNFT.address as `0x${string}`,
+              abi: dynamicContracts.QuestNFT.abi,
+              functionName: 'getUserNFTCounts',
+              args: [address],
+            }) as bigint[]
+            
+            const afterCountsNum = afterCounts.map(count => Number(count))
+            const beforeCountsNum = lastPurchase.items?.beforeCounts || []
+            
+            console.log('📊 NFT counts after package purchase:', afterCountsNum.map((count, index) => `Type ${index + 1}: ${count}`))
+            
+            // Calculate which NFT types were received (increased count)
+            const receivedNFTTypes: number[] = []
+            for (let i = 0; i < afterCountsNum.length; i++) {
+              const received = afterCountsNum[i] - beforeCountsNum[i]
+              if (received > 0) {
+                // Add the NFT type (i+1) as many times as received
+                for (let j = 0; j < received; j++) {
+                  receivedNFTTypes.push(i + 1)
+                }
+              }
+            }
+            
+            console.log('🎁 Actually received NFT types:', receivedNFTTypes)
+            
+            // Update lastPurchase with actual NFT data
+            setLastPurchase(prev => prev ? {
+              ...prev,
+              items: {
+                ...prev.items,
+                nftTypes: receivedNFTTypes
+              }
+            } : null)
+            
+          } catch (error) {
+            console.error('❌ Failed to fetch actual NFTs:', error)
+            // Fallback: show first 5 types as estimate
+            const estimatedTypes = [1, 2, 3, 4, 5]
+            setLastPurchase(prev => prev ? {
+              ...prev,
+              items: {
+                ...prev.items,
+                nftTypes: estimatedTypes
+              }
+            } : null)
+          }
+        }
+        
+        fetchActualNFTs()
+      }
+      
       setShowSuccessModal(true)
       setIsProcessing(false) // Reset processing state
       setProcessedTransactionHash(hash) // Mark this transaction as processed
     }
-  }, [isSuccess, lastPurchase, showSuccessModal, hash, processedTransactionHash])
+  }, [isSuccess, lastPurchase, showSuccessModal, hash, processedTransactionHash, dynamicContracts, address])
   
   // Reset processing state and modal when transaction finishes
   useEffect(() => {
@@ -236,6 +300,16 @@ export function useShop() {
       setError(null)
       setIsProcessing(true)
       
+      // Get user's NFT counts BEFORE purchase to calculate what was received
+      const beforeCounts = await readContract(config, {
+        address: dynamicContracts?.QuestNFT?.address as `0x${string}`,
+        abi: dynamicContracts?.QuestNFT?.abi || [],
+        functionName: 'getUserNFTCounts',
+        args: [address],
+      }) as bigint[]
+      
+      console.log('📊 NFT counts before package purchase:', beforeCounts.map((count, index) => `Type ${index + 1}: ${count}`))
+      
       // Check allowance
       if (!allowance || (allowance as bigint) < prices.questNFTPackagePrice) {
         await approveUSDT(prices.questNFTPackagePrice * BigInt(2)) // Approve double for future transactions
@@ -255,11 +329,12 @@ export function useShop() {
       
       console.log('✅ NFT Package Purchase submitted:', result)
       
-      // Set purchase info for success modal (will show when transaction confirms)
+      // Set purchase info for success modal - will be updated with real data when transaction confirms
       setLastPurchase({
         type: 'package',
         items: {
-          nftTypes: [1, 2, 3, 4, 5] // Default package contents
+          nftTypes: [], // Will be filled with actual received NFTs after transaction
+          beforeCounts: beforeCounts.map(count => Number(count)) // Store before counts for comparison
         }
       })
     } catch (err) {

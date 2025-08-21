@@ -47,13 +47,12 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
     const ownedTypesArray = Array.from(ownedIds).sort()
     const missingTypes = NFT_TYPES.filter(t => !ownedIds.has(t.id)).map(t => t.id)
     
-    console.log('📊 Plant Creation Analysis:', {
-      totalNFTs: blockchainNFTData.nfts.length,
-      uniqueTypes: ownedTypesArray,
-      uniqueCount: ownedIds.size,
-      missingTypes: missingTypes,
-      canCreateFromContract: canCreateFromContract
-    })
+      console.log('📊 Plant Creation Analysis:', {
+    totalNFTs: blockchainNFTData.nfts.length,
+    uniqueTypes: ownedTypesArray,
+    uniqueCount: ownedIds.size,
+    missingTypes: missingTypes
+  })
     
     return { 
       ownedTypeIds: ownedIds, 
@@ -62,8 +61,9 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
     }
   }, [blockchainNFTData.nfts, canCreateFromContract])
 
-  // Verwende direkte Contract-Prüfung statt lokaler Logik
-  const canCreate = canCreateFromContract && plantName.trim().length > 0
+  // Use the same logic as the display: ownedCount >= 15
+  const hasAllRequiredTypes = ownedCount >= 15
+  const canCreate = hasAllRequiredTypes && plantName.trim().length > 0
 
   return (
     <div className="space-y-6">

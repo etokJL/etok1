@@ -16,6 +16,7 @@ import { PageTemplate } from '@/components/layout/page-template'
 import { PageHeader } from '@/components/layout/page-header'
 
 import { PlantCreationPanel } from '@/components/plants/plant-creation-panel'
+import { PurchaseSuccessModal } from '@/components/shop/purchase-success-modal'
 import { NFT_TYPES } from '@/lib/constants'
 // import type { UserNFT } from '@/types/nft'
 
@@ -37,6 +38,11 @@ export default function SimplePage() {
   const totalNFTs = blockchainNFTData.totalNFTs
   const uniqueTypes = blockchainNFTData.uniqueTypes  
   const plantsCreated = blockchainPlantData.plantsCreated
+
+  // Debug: Log when plantsCreated changes
+  useEffect(() => {
+    console.log('🌱 Navigation plantsCreated value changed:', plantsCreated, 'Key will be: nav-' + plantsCreated)
+  }, [plantsCreated])
 
 
 
@@ -74,6 +80,25 @@ export default function SimplePage() {
     blockchainNFTData.refresh()
     blockchainPlantData.refresh()
   }, [blockchainNFTData.refresh, blockchainPlantData.refresh])
+
+  // Auto-refresh plant data when plant is created
+  const handlePlantCreated = useCallback(async () => {
+    console.log('🌱 Plant created, refreshing data...')
+    
+    // Small delay to allow blockchain to propagate
+    setTimeout(async () => {
+      console.log('🔄 Starting data refresh after plant creation...')
+      blockchainNFTData.refresh() // Refresh NFTs (they should be burned)
+      await blockchainPlantData.forceRefresh() // Force refresh plant data
+      
+      // Force a small delay and re-render trigger to ensure navigation updates
+      setTimeout(() => {
+        console.log('🔄 Final refresh trigger for navigation update...')
+        blockchainPlantData.refresh() // Additional refresh to trigger React re-render
+        console.log('✅ All data refresh completed after plant creation')
+      }, 1000) // Additional 1 second delay
+    }, 2000) // 2 second delay
+  }, [blockchainNFTData.refresh, blockchainPlantData.forceRefresh, blockchainPlantData.refresh])
 
 
 
@@ -269,6 +294,7 @@ export default function SimplePage() {
       ) : (
         <div className="flex flex-col min-h-screen">
           <AppNavigation
+            key={`nav-${plantsCreated}`} // Force re-render when plantsCreated changes
             activeTab={activeTab}
             onTabChange={setActiveTab}
             totalNFTs={totalNFTs}
@@ -326,9 +352,9 @@ export default function SimplePage() {
                       try {
                         console.log('🚀 Calling plantToken.createPlant...')
                         await plantToken.createPlant(plantName)
-                        console.log('✅ createPlant completed, refreshing data...')
-                        await refreshData()
-                        console.log('✅ Backend data refreshed')
+                        console.log('✅ createPlant completed, triggering refresh...')
+                        handlePlantCreated() // Auto-refresh after creation
+                        console.log('✅ Data refresh triggered')
                       } catch (error) {
                         console.error('❌ Error in onCreate:', error)
                       }
@@ -366,6 +392,17 @@ export default function SimplePage() {
       )}
 
       
+      {/* Plant Creation Success Modal */}
+      <PurchaseSuccessModal
+        isOpen={plantToken.showSuccessModal}
+        onClose={plantToken.closeSuccessModal}
+        purchaseType="plant"
+        purchasedItems={{
+          plantName: plantToken.lastCreatedPlant?.name,
+          tokenId: plantToken.lastCreatedPlant?.tokenId
+        }}
+      />
+
       {/* Animation system removed - NFTs no longer animate on mint/burn */}
 
       {/* Pure blockchain error handling is done in individual components */}

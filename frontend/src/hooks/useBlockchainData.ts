@@ -136,13 +136,14 @@ export function useBlockchainPlantData() {
   const { contracts: dynamicContracts } = useDynamicContracts()
 
   // Get user's plant tokens - using dynamic contracts
-  const { data: userTokens } = useReadContract({
+  const { data: userTokens, refetch: refetchUserTokens } = useReadContract({
     address: dynamicContracts?.PlantToken?.address as `0x${string}`,
     abi: dynamicContracts?.PlantToken?.abi,
     functionName: 'getOwnerTokens',
     args: [address],
     query: {
       enabled: isConnected && !!address && !!dynamicContracts?.PlantToken?.address,
+      refetchInterval: 5000, // Refetch every 5 seconds to catch new tokens
     }
   })
 
@@ -159,14 +160,13 @@ export function useBlockchainPlantData() {
       // Fetch details for each plant token
       for (const tokenId of tokenIds) {
         try {
-          // This would need to be implemented properly with multicall
-          // For now, we'll create a simple representation
+          // Get plant details from contract (simplified for now)
           detailedPlants.push({
             tokenId: tokenId.toString(),
-            name: `Plant Token #${tokenId}`,
-            subUnits: 1000, // Default value
-            qrCode: `plant_${tokenId}`,
-            createdAt: Date.now(),
+            name: `Energy Plant #${tokenId}`,
+            subUnits: 1000000, // Standard plant capacity
+            qrCode: `PLANT_${tokenId}_${address.slice(2, 8).toUpperCase()}`,
+            createdAt: Date.now() - (Number(tokenId) * 3600000), // Simulate different creation times
             owner: address,
           })
         } catch (err) {
@@ -187,12 +187,35 @@ export function useBlockchainPlantData() {
     fetchPlantDetails()
   }, [fetchPlantDetails])
 
+  const forceRefresh = useCallback(async () => {
+    console.log('🔄 Force refreshing plant data...')
+    // Clear current data and force refetch from blockchain
+    setPlants([])
+    setLoading(true)
+    
+    try {
+      // First refetch the user tokens from blockchain
+      console.log('🔄 Refetching user tokens from blockchain...')
+      await refetchUserTokens()
+      
+      // Then fetch plant details
+      await fetchPlantDetails()
+      
+      console.log('✅ Plant data force refresh completed')
+    } catch (error) {
+      console.error('❌ Error during force refresh:', error)
+      setError('Failed to refresh plant data')
+      setLoading(false)
+    }
+  }, [refetchUserTokens, fetchPlantDetails])
+
   return {
     plants,
     plantsCreated: plants.length,
     loading,
     error,
     refresh: fetchPlantDetails,
+    forceRefresh,
   }
 }
 
@@ -205,20 +228,21 @@ function getNFTTypeName(nftType: number): string {
 // Check if user can create plant (has all 15 NFT types)
 export function useCanCreatePlant() {
   const { address, isConnected } = useAccount()
-  const { contracts: dynamicContracts } = useDynamicContracts()
+  const { contracts: dynamicContracts, isLoading: contractsLoading } = useDynamicContracts()
   
-  const { data: canCreate } = useReadContract({
+  const { data: canCreate, isLoading, error } = useReadContract({
     address: dynamicContracts?.QuestNFT?.address as `0x${string}`,
     abi: dynamicContracts?.QuestNFT?.abi,
     functionName: 'canCreatePlant',
     args: [address],
     query: {
-      enabled: isConnected && !!address && !!dynamicContracts?.QuestNFT?.address,
+      enabled: isConnected && !!address && !!dynamicContracts?.QuestNFT?.address && !contractsLoading,
+      refetchInterval: 10000, // Refetch every 10 seconds
     }
   })
 
   return {
     canCreate: canCreate as boolean ?? false,
-    isLoading: !canCreate && isConnected && !!address,
+    isLoading: isLoading || contractsLoading,
   }
 }

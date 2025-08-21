@@ -14,6 +14,7 @@ interface PurchaseSuccessModalProps {
     nftType?: number
     nftTypes?: number[]
     plantName?: string
+    tokenId?: string
   }
 }
 
@@ -47,11 +48,8 @@ export function PurchaseSuccessModal({
       return purchasedItems.nftTypes
     }
     
-    // Default fallback for package (5 random NFTs)
-    if (purchaseType === 'package') {
-      return [1, 2, 3, 4, 5] // Show first 5 as example
-    }
-    
+    // No fallback data - if no real data, show empty
+    console.log('⚠️ No NFT data provided for overlay:', { purchaseType, purchasedItems })
     return []
   }
 
@@ -148,13 +146,37 @@ export function PurchaseSuccessModal({
                   className="text-center"
                 >
                   <div className="inline-block p-8 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl shadow-lg">
-                    <Sparkles className="h-24 w-24 text-green-600 mx-auto mb-4" />
+                    <div className="flex flex-col items-center mb-4">
+                      <div className="relative mb-3">
+                        <Image
+                          src="/metadata/images/plant.png"
+                          alt="Plant Token"
+                          width={96}
+                          height={96}
+                          className="rounded-xl shadow-lg"
+                        />
+                        <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                          NEW
+                        </div>
+                      </div>
+                      <Sparkles className="h-6 w-6 text-green-600" />
+                    </div>
                     <h3 className="text-2xl font-bold text-green-800 mb-2">
-                      {purchasedItems?.plantName || 'Energy Plant'}
+                      🌱 {purchasedItems?.plantName || 'Energy Plant'}
                     </h3>
-                    <p className="text-green-600">
-                      This Plant Token has been added to your collection!
+                    {purchasedItems?.tokenId && (
+                      <div className="text-sm text-green-700 mb-2">
+                        Token #{purchasedItems.tokenId}
+                      </div>
+                    )}
+                    <p className="text-green-600 mb-3">
+                      Plant Token successfully created!
                     </p>
+                    <div className="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                      ✅ 15 Quest NFTs burned<br/>
+                      ✅ Plant Token generated<br/>
+                      ✅ Added to your collection
+                    </div>
                   </div>
                 </motion.div>
               ) : (
