@@ -83,42 +83,42 @@ export function useShop() {
   // Read shop prices
   const { data: pricesData } = useReadContract({
     address: dynamicContracts?.NFTShop?.address as `0x${string}`,
-    abi: shopAbi,
+    abi: dynamicContracts?.NFTShop?.abi,
     functionName: 'getPrices',
     query: {
-      enabled: !!dynamicContracts?.NFTShop?.address
+      enabled: !!dynamicContracts?.NFTShop?.address && !!dynamicContracts?.NFTShop?.abi
     }
   })
 
   // Read user USDT balance
   const { data: usdtBalance, refetch: refetchBalance } = useReadContract({
     address: dynamicContracts?.MockUSDT?.address as `0x${string}`,
-    abi: usdtAbi,
+    abi: dynamicContracts?.MockUSDT?.abi,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: {
-      enabled: !!dynamicContracts?.MockUSDT?.address && !!address
+      enabled: !!dynamicContracts?.MockUSDT?.address && !!dynamicContracts?.MockUSDT?.abi && !!address
     }
   })
 
   // Read USDT allowance for shop
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: dynamicContracts?.MockUSDT?.address as `0x${string}`,
-    abi: usdtAbi,
+    abi: dynamicContracts?.MockUSDT?.abi,
     functionName: 'allowance',
     args: address && dynamicContracts?.NFTShop?.address ? [address, dynamicContracts.NFTShop.address] : undefined,
     query: {
-      enabled: !!dynamicContracts?.MockUSDT?.address && !!dynamicContracts?.NFTShop?.address && !!address
+      enabled: !!dynamicContracts?.MockUSDT?.address && !!dynamicContracts?.MockUSDT?.abi && !!dynamicContracts?.NFTShop?.address && !!address
     }
   })
 
   // Read shop stats
   const { data: shopStatsData } = useReadContract({
     address: dynamicContracts?.NFTShop?.address as `0x${string}`,
-    abi: shopAbi,
+    abi: dynamicContracts?.NFTShop?.abi,
     functionName: 'getShopStats',
     query: {
-      enabled: !!dynamicContracts?.NFTShop?.address
+      enabled: !!dynamicContracts?.NFTShop?.address && !!dynamicContracts?.NFTShop?.abi
     }
   })
 
@@ -181,7 +181,7 @@ export function useShop() {
 
       await writeContract({
         address: dynamicContracts.MockUSDT.address as `0x${string}`,
-        abi: usdtAbi,
+        abi: dynamicContracts.MockUSDT.abi,
         functionName: 'approve',
         args: [dynamicContracts.NFTShop.address, amount],
       })
@@ -209,17 +209,25 @@ export function useShop() {
       console.log('🚰 Getting USDT from faucet...')
       const result = await writeContract({
         address: dynamicContracts.MockUSDT.address as `0x${string}`,
-        abi: usdtAbi,
+        abi: dynamicContracts.MockUSDT.abi,
         functionName: 'faucet',
       })
       
       console.log('✅ USDT faucet transaction submitted:', result)
+      
+      // Wait for transaction to be mined and then refresh balance
+      console.log('⏳ Waiting for transaction confirmation...')
+      await new Promise(resolve => setTimeout(resolve, 2000)) // Wait 2 seconds
+      
+      // Refresh USDT balance
+      console.log('🔄 Refreshing USDT balance...')
+      await refetchBalance()
     } catch (err) {
       console.error('❌ USDT faucet failed:', err)
       setError(err instanceof Error ? err.message : 'Failed to get USDT from faucet')
       throw err
     }
-  }, [address, writeContract])
+  }, [address, writeContract, dynamicContracts])
 
   // Purchase Quest NFT package
   const purchaseQuestNFTPackage = useCallback(async () => {
@@ -241,7 +249,7 @@ export function useShop() {
 
       const result = await writeContract({
         address: dynamicContracts.NFTShop.address as `0x${string}`,
-        abi: shopAbi,
+        abi: dynamicContracts.NFTShop.abi,
         functionName: 'purchaseQuestNFTPackage',
       })
       
@@ -303,7 +311,7 @@ export function useShop() {
 
       const result = await writeContract({
         address: dynamicContracts.NFTShop.address as `0x${string}`,
-        abi: shopAbi,
+        abi: dynamicContracts.NFTShop.abi,
         functionName: 'purchaseSingleQuestNFT',
         args: [BigInt(nftType)],
       })
@@ -366,7 +374,7 @@ export function useShop() {
 
       const result = await writeContract({
         address: dynamicContracts.NFTShop.address as `0x${string}`,
-        abi: shopAbi,
+        abi: dynamicContracts.NFTShop.abi,
         functionName: 'purchasePlantToken',
         args: [plantName],
       })

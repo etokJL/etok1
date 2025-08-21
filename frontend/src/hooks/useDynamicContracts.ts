@@ -41,9 +41,6 @@ export function useDynamicContracts() {
   const [deployed, setDeployed] = useState(false)
 
   const loadContracts = useCallback(async (force = false) => {
-    // If we already have contracts and not forcing reload, return
-    if (contracts && !force) return contracts
-
     setIsLoading(true)
     setError(null)
 
@@ -100,7 +97,7 @@ export function useDynamicContracts() {
     } finally {
       setIsLoading(false)
     }
-  }, [contracts])
+  }, [])
 
   const checkDeployment = useCallback(async (): Promise<boolean> => {
     try {
@@ -163,7 +160,7 @@ export function useDynamicContracts() {
   // Auto-load contracts on mount
   useEffect(() => {
     loadContracts()
-  }, [loadContracts])
+  }, []) // Remove loadContracts dependency to prevent infinite loop
 
   // Auto-check deployment status periodically in development
   useEffect(() => {
