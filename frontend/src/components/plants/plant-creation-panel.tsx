@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import type { UserNFT } from '@/types/nft'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBlockchainNFTData, useCanCreatePlant } from '@/hooks/useBlockchainData'
+import { NFT_TYPES } from '@/lib/constants'
 
 interface PlantCreationPanelProps {
   questNFTs: UserNFT[] // Legacy prop - wird durch on-chain Daten ersetzt
@@ -11,23 +12,8 @@ interface PlantCreationPanelProps {
   isCreating?: boolean
 }
 
-const REQUIRED_TYPES = [
-  { id: 1, name: 'Solar Panel', image: 'solar-panel.png', energyType: 'Solar' },
-  { id: 2, name: 'Home Battery', image: 'home-battery.png', energyType: 'Storage' },
-  { id: 3, name: 'Smart Home System', image: 'smart-home.png', energyType: 'Smart' },
-  { id: 4, name: 'E-Car', image: 'e-car.png', energyType: 'Transport' },
-  { id: 5, name: 'Smart Meter', image: 'smart-meter.png', energyType: 'Smart' },
-  { id: 6, name: 'Heat Pump', image: 'heat-pump.png', energyType: 'Smart' },
-  { id: 7, name: 'E-Bike Battery', image: 'e-bike.png', energyType: 'Transport' },
-  { id: 8, name: 'Smartphone', image: 'smartphone.png', energyType: 'Smart' },
-  { id: 9, name: 'Power Bank', image: 'power-bank.png', energyType: 'Storage' },
-  { id: 10, name: 'Charging Station', image: 'charging-station.png', energyType: 'Transport' },
-  { id: 11, name: 'E-Scooter', image: 'e-scooter.png', energyType: 'Transport' },
-  { id: 12, name: 'E-Roller', image: 'e-roller.png', energyType: 'Transport' },
-  { id: 13, name: 'Electric Boiler', image: 'electric-boiler.png', energyType: 'Smart' },
-  { id: 14, name: 'Charge Controller', image: 'charge-controller.png', energyType: 'Solar' },
-  { id: 15, name: 'Solar Inverter', image: 'solar-inverter.png', energyType: 'Solar' },
-]
+// Use central NFT_TYPES instead of custom REQUIRED_TYPES
+// All 15 NFT types are required for plant creation
 
 const energyIcons: Record<string, string> = {
   Solar: '☀️',
@@ -59,7 +45,7 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
     })
     
     const ownedTypesArray = Array.from(ownedIds).sort()
-    const missingTypes = REQUIRED_TYPES.filter(t => !ownedIds.has(t.id)).map(t => t.id)
+    const missingTypes = NFT_TYPES.filter(t => !ownedIds.has(t.id)).map(t => t.id)
     
     console.log('📊 Plant Creation Analysis:', {
       totalNFTs: blockchainNFTData.nfts.length,
@@ -96,16 +82,16 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
             <motion.div
               className="h-full bg-green-500"
               initial={{ width: 0 }}
-              animate={{ width: `${(ownedCount / REQUIRED_TYPES.length) * 100}%` }}
+              animate={{ width: `${(ownedCount / NFT_TYPES.length) * 100}%` }}
               transition={{ duration: 0.6 }}
             />
           </div>
-          <div className="text-sm font-semibold text-gray-800">{ownedCount} / {REQUIRED_TYPES.length}</div>
+          <div className="text-sm font-semibold text-gray-800">{ownedCount} / {NFT_TYPES.length}</div>
         </div>
 
         {/* Required Types Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {REQUIRED_TYPES.map((t) => {
+          {NFT_TYPES.map((t) => {
             const isOwned = ownedTypeIds.has(t.id)
             const onChainNFT = blockchainNFTData.nfts.find(nft => nft.nftType === t.id)
             return (
@@ -113,7 +99,7 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/metadata/images/${t.image}`}
-                  alt={t.name}
+                  alt={t.displayName}
                   className={`w-full h-28 object-cover ${isOwned ? '' : 'opacity-40'} transition-opacity`}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
@@ -123,12 +109,12 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
                 />
                 {/* Fallback icon for missing image */}
                 <div className={`hidden absolute inset-0 items-center justify-center ${isOwned ? '' : 'opacity-40'}`}>
-                  <div className="text-3xl">{energyIcons[t.energyType] || '⚡'}</div>
+                  <div className="text-3xl">⚡</div>
                 </div>
                 {/* Metadata (hidden for missing) */}
                 <div className={`p-3 ${isOwned ? 'opacity-100' : 'opacity-0'}`}>
-                  <div className="text-sm font-semibold text-gray-900 truncate">{onChainNFT?.name || t.name}</div>
-                  <div className="text-xs text-gray-600">{t.energyType}</div>
+                  <div className="text-sm font-semibold text-gray-900 truncate">{onChainNFT?.name || t.displayName}</div>
+                  <div className="text-xs text-gray-600">Type {t.id}</div>
                 </div>
                 {!isOwned && (
                   <div className="absolute inset-0 bg-white/30" />
@@ -149,7 +135,7 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
           <h3 className="text-lg font-semibold mb-3">Will be burned</h3>
           <div className="flex flex-wrap gap-2">
             <AnimatePresence>
-              {REQUIRED_TYPES.filter(t => ownedTypeIds.has(t.id)).map((t) => (
+              {NFT_TYPES.filter(t => ownedTypeIds.has(t.id)).map((t) => (
                 <motion.div
                   key={t.id}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-white"
@@ -158,8 +144,8 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
                   exit={{ opacity: 0, y: -6 }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`/metadata/images/${t.image}`} alt={t.name} className="w-6 h-6 rounded" />
-                  <span className="text-sm font-medium">{t.name}</span>
+                  <img src={`/metadata/images/${t.image}`} alt={t.displayName} className="w-6 h-6 rounded" />
+                  <span className="text-sm font-medium">{t.displayName}</span>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -193,7 +179,7 @@ export function PlantCreationPanel({ onCreate, isCreating }: PlantCreationPanelP
               console.log('isCreating:', isCreating)
               console.log('plantName:', plantName.trim())
               console.log('ownedCount:', ownedCount)
-              console.log('required:', REQUIRED_TYPES.length)
+              console.log('required:', NFT_TYPES.length)
               
               if (canCreate) {
                 try {

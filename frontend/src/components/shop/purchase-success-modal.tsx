@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Sparkles, Gift, Package } from 'lucide-react'
+import Image from 'next/image'
+import { NFT_TYPES, RARITY_COLORS, RARITY_GLOW, type NFTRarity } from '@/lib/constants'
 
 interface PurchaseSuccessModalProps {
   isOpen: boolean
@@ -15,48 +17,10 @@ interface PurchaseSuccessModalProps {
   }
 }
 
-const NFT_NAMES: { [key: number]: string } = {
-  1: 'Solar Panel Alpha',
-  2: 'Wind Turbine Beta',
-  3: 'Hydro Generator Gamma',
-  4: 'Nuclear Core Delta',
-  5: 'Geothermal Epsilon',
-  6: 'Biomass Zeta',
-  7: 'Tidal Wave Eta',
-  8: 'Fusion Reactor Theta',
-  9: 'Carbon Capture Iota',
-  10: 'Smart Grid Kappa',
-  11: 'Battery Storage Lambda',
-  12: 'Hydrogen Cell Mu',
-  13: 'Quantum Energy Nu',
-  14: 'Plasma Generator Xi',
-  15: 'Zero Point Omicron'
-}
+// Use NFT_TYPES from constants.ts as single source of truth
+// No need for duplicate NFT_NAMES mapping
 
-const NFT_RARITIES: { [key: number]: string } = {
-  1: 'common', 2: 'common', 3: 'common', 4: 'common', 5: 'common',
-  6: 'uncommon', 7: 'uncommon', 8: 'uncommon', 9: 'uncommon', 10: 'uncommon',
-  11: 'rare', 12: 'rare', 13: 'rare',
-  14: 'epic', 15: 'legendary'
-}
-
-type RarityType = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-
-const RARITY_COLORS: Record<RarityType, string> = {
-  common: 'from-gray-400 to-gray-600',
-  uncommon: 'from-green-400 to-green-600',
-  rare: 'from-blue-400 to-blue-600',
-  epic: 'from-purple-400 to-purple-600',
-  legendary: 'from-yellow-400 to-orange-500'
-}
-
-const RARITY_GLOW: Record<RarityType, string> = {
-  common: 'shadow-lg',
-  uncommon: 'shadow-green-500/50',
-  rare: 'shadow-blue-500/50',
-  epic: 'shadow-purple-500/50',
-  legendary: 'shadow-yellow-500/50'
-}
+// All rarity data now comes from central constants.ts
 
 export function PurchaseSuccessModal({ 
   isOpen, 
@@ -91,6 +55,16 @@ export function PurchaseSuccessModal({
     return []
   }
 
+  const getNFTImagePath = (nftType: number) => {
+    const nftData = NFT_TYPES.find(nft => nft.id === nftType)
+    return nftData ? `/metadata/images/${nftData.image}` : `/metadata/images/e-car.png` // fallback
+  }
+
+  const getNFTDisplayName = (nftType: number) => {
+    const nftData = NFT_TYPES.find(nft => nft.id === nftType)
+    return nftData?.displayName || `NFT #${nftType}`
+  }
+
   const nftsToShow = getNFTsToShow()
 
   return (
@@ -101,7 +75,10 @@ export function PurchaseSuccessModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={onClose}
+          onClick={(e) => {
+            console.log('🔄 Purchase Success Modal background clicked, closing modal')
+            onClose()
+          }}
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0, y: 50 }}
@@ -114,7 +91,11 @@ export function PurchaseSuccessModal({
             {/* Header */}
             <div className="relative p-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-2xl">
               <button
-                onClick={onClose}
+                type="button"
+                onClick={() => {
+                  console.log('🔄 Purchase Success Modal X button clicked, closing modal')
+                  onClose()
+                }}
                 className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors"
               >
                 <X className="h-6 w-6" />
@@ -190,7 +171,8 @@ export function PurchaseSuccessModal({
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {nftsToShow.map((nftType, index) => {
-                      const rarity = NFT_RARITIES[nftType] as RarityType
+                      const nftData = NFT_TYPES.find(nft => nft.id === nftType)
+                      const rarity = nftData?.rarity || 'common' as NFTRarity
                       
                       return (
                         <motion.div
@@ -218,17 +200,23 @@ export function PurchaseSuccessModal({
                               {rarity}
                             </div>
                             
-                            {/* NFT Image Placeholder */}
-                            <div className="w-full h-32 mb-4 bg-white/20 rounded-xl flex items-center justify-center">
-                              <div className="text-4xl font-bold opacity-70">
-                                #{nftType}
-                              </div>
+                            {/* NFT Image */}
+                            <div className="w-full h-32 mb-4 bg-white/20 rounded-xl overflow-hidden flex items-center justify-center relative">
+                              <Image 
+                                src={getNFTImagePath(nftType)}
+                                alt={getNFTDisplayName(nftType)}
+                                fill
+                                className="object-cover rounded-lg"
+                                onError={() => {
+                                  console.log(`❌ Failed to load NFT image for type ${nftType}:`, getNFTImagePath(nftType))
+                                }}
+                              />
                             </div>
                             
                             {/* NFT Info */}
                             <div className="text-center">
                               <h4 className="text-lg font-bold mb-1">
-                                {NFT_NAMES[nftType]}
+                                {getNFTDisplayName(nftType)}
                               </h4>
                               <p className="text-sm opacity-80">
                                 Type {nftType} • {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
@@ -260,6 +248,7 @@ export function PurchaseSuccessModal({
                 className="flex flex-col sm:flex-row gap-4 mt-8 justify-center"
               >
                 <button
+                  type="button"
                   onClick={onClose}
                   className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
@@ -267,6 +256,7 @@ export function PurchaseSuccessModal({
                 </button>
                 
                 <button
+                  type="button"
                   onClick={() => {
                     onClose()
                     // Navigate to collection page

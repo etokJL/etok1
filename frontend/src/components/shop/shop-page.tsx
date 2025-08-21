@@ -3,11 +3,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { 
-  ShoppingCartIcon, 
-  CurrencyDollarIcon, 
   GiftIcon,
   SparklesIcon,
-  CubeIcon
+  CubeIcon,
+  ShoppingCartIcon
 } from '@heroicons/react/24/outline'
 import { useShop } from '@/hooks/useShop'
 import { PurchaseSuccessModal } from './purchase-success-modal'
@@ -15,24 +14,11 @@ import { useAccount } from 'wagmi'
 import { ShopCard } from './shop-card'
 import { USDTBalance } from './usdt-balance'
 import { ShopStats } from './shop-stats'
+import { NFT_TYPES } from '@/lib/constants'
+import Image from 'next/image'
 
-const ENERGY_TYPES = [
-  { id: 1, name: 'Solar Panel', icon: '☀️', description: 'Harness the power of the sun' },
-  { id: 2, name: 'Wind Turbine', icon: '💨', description: 'Generate energy from wind' },
-  { id: 3, name: 'Hydroelectric', icon: '💧', description: 'Power from flowing water' },
-  { id: 4, name: 'Geothermal', icon: '🌋', description: 'Energy from Earth\'s core' },
-  { id: 5, name: 'Biomass', icon: '🌱', description: 'Renewable organic energy' },
-  { id: 6, name: 'Nuclear', icon: '⚛️', description: 'Clean atomic power' },
-  { id: 7, name: 'E-Bike Battery', icon: '🔋', description: 'Portable electric storage' },
-  { id: 8, name: 'Smart Grid', icon: '🔌', description: 'Intelligent energy distribution' },
-  { id: 9, name: 'Fuel Cell', icon: '🧪', description: 'Hydrogen-powered energy' },
-  { id: 10, name: 'Tidal', icon: '🌊', description: 'Ocean wave energy' },
-  { id: 11, name: 'Carbon Capture', icon: '🏭', description: 'Clean air technology' },
-  { id: 12, name: 'Energy Storage', icon: '📦', description: 'Grid-scale batteries' },
-  { id: 13, name: 'Micro Inverter', icon: '⚡', description: 'Solar power conversion' },
-  { id: 14, name: 'Heat Pump', icon: '🔥', description: 'Efficient heating system' },
-  { id: 15, name: 'LED Efficiency', icon: '💡', description: 'Energy-saving lighting' }
-]
+// Use central NFT definitions instead of custom ENERGY_TYPES
+// NFT_TYPES from lib/constants.ts is the source of truth
 
 export function ShopPage() {
   const { address } = useAccount()
@@ -85,6 +71,7 @@ export function ShopPage() {
           </p>
           {contractsError && (
             <button 
+              type="button"
               onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
@@ -144,8 +131,9 @@ export function ShopPage() {
             { id: 'plants', label: 'Plant Tokens', icon: SparklesIcon }
           ].map(({ id, label, icon: Icon }) => (
             <button
+              type="button"
               key={id}
-              onClick={() => setActiveTab(id as any)}
+              onClick={() => setActiveTab(id as 'packages' | 'individual' | 'plants')}
               className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center ${
                 activeTab === id
                   ? 'bg-white text-blue-600 shadow-sm'
@@ -202,21 +190,30 @@ export function ShopPage() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              {ENERGY_TYPES.map((energyType) => (
+              {NFT_TYPES.map((nftType) => (
                 <motion.button
-                  key={energyType.id}
+                  key={nftType.id}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedNFTType(energyType.id)}
+                  onClick={() => setSelectedNFTType(nftType.id)}
                   className={`p-4 rounded-xl border-2 transition-all ${
-                    selectedNFTType === energyType.id
+                    selectedNFTType === nftType.id
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="text-3xl mb-2">{energyType.icon}</div>
-                  <div className="text-sm font-medium text-gray-900">{energyType.name}</div>
-                  <div className="text-xs text-gray-500 mt-1">{energyType.description}</div>
+                  {/* NFT Image */}
+                  <div className="relative w-16 h-16 mx-auto mb-2 rounded-lg overflow-hidden">
+                    <Image 
+                      src={`/metadata/images/${nftType.image}`}
+                      alt={nftType.displayName}
+                      fill
+                      className="object-cover"
+                      onError={() => console.log(`❌ Failed to load shop NFT image: ${nftType.image}`)}
+                    />
+                  </div>
+                  <div className="text-sm font-medium text-gray-900">{nftType.displayName}</div>
+                  <div className="text-xs text-gray-500 mt-1">Type {nftType.id} • {nftType.name}</div>
                 </motion.button>
               ))}
             </div>
@@ -228,7 +225,7 @@ export function ShopPage() {
                 className="bg-white rounded-xl border border-gray-200 p-6 text-center"
               >
                 <h4 className="text-lg font-bold text-gray-900 mb-4">
-                  Purchase {ENERGY_TYPES.find(t => t.id === selectedNFTType)?.name} NFT
+                  Purchase {NFT_TYPES.find(t => t.id === selectedNFTType)?.displayName} NFT
                 </h4>
                 <motion.button
                   whileHover={{ scale: 1.02 }}

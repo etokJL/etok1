@@ -3,6 +3,7 @@ import { useAccount, useReadContract, useReadContracts } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 import { config } from '@/lib/wagmi'
 import { useDynamicContracts } from './useDynamicContracts'
+import { NFT_TYPES } from '@/lib/constants'
 
 export interface OnChainNFT {
   tokenId: string
@@ -51,12 +52,11 @@ export function useBlockchainNFTData() {
       const balance = Number(totalBalance)
       
       if (balance > 0) {
-        // For ERC-721A, we have tokens 1-5 corresponding to NFT types 1-5
-        const nftNames = [
-          'Solar Panel', 'Home Battery', 'Smart Home System', 'E-Car', 'Smart Meter',
-          'Heat Pump', 'E-Bike', 'Smartphone', 'Power Bank', 'Charging Station',
-          'E-Scooter', 'E-Roller', 'Electric Boiler', 'Charge Controller', 'Solar Inverter'
-        ]
+        // Use central NFT_TYPES for names
+        const getNFTName = (nftType: number) => {
+          const nftData = NFT_TYPES.find(nft => nft.id === nftType)
+          return nftData?.displayName || `NFT Type ${nftType}`
+        }
         
         // Get actual NFT types from on-chain data using Transfer events
         // This approach is more reliable than hardcoded mappings
@@ -82,7 +82,7 @@ export function useBlockchainNFTData() {
               detailedNFTs.push({
                 tokenId: `token_${tokenCounter}_type_${nftType}`,
                 nftType: nftType,
-                name: nftNames[nftType - 1] || `NFT Type ${nftType}`,
+                name: getNFTName(nftType),
                 owner: address,
               })
               tokenCounter++
@@ -196,27 +196,10 @@ export function useBlockchainPlantData() {
   }
 }
 
-// Helper function to get NFT type names
+// Helper function to get NFT type names - uses central NFT_TYPES
 function getNFTTypeName(nftType: number): string {
-  const nftNames: { [key: number]: string } = {
-    1: 'Solar Panel',
-    2: 'Home Battery', 
-    3: 'Smart Home System',
-    4: 'E-Car',
-    5: 'Smart Meter',
-    6: 'Heat Pump',
-    7: 'E-Bike',
-    8: 'Smartphone',
-    9: 'Power Bank',
-    10: 'Charging Station',
-    11: 'E-Scooter',
-    12: 'E-Roller',
-    13: 'Electric Boiler',
-    14: 'Charge Controller',
-    15: 'Solar Inverter',
-  }
-  
-  return nftNames[nftType] || `NFT Type ${nftType}`
+  const nftData = NFT_TYPES.find(nft => nft.id === nftType)
+  return nftData?.displayName || `NFT Type ${nftType}`
 }
 
 // Check if user can create plant (has all 15 NFT types)

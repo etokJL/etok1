@@ -16,24 +16,43 @@ export const NFT_COLLECTION = {
   REQUIRED_FOR_PLANT: 15, // Need all 15 different types
 } as const
 
-// NFT Types from the configuration
+// NFT Types from the configuration - SINGLE SOURCE OF TRUTH
 export const NFT_TYPES = [
-  { id: 1, name: 'e-car', image: 'e-car.png', displayName: 'Electric Car' },
-  { id: 2, name: 'e-bike', image: 'e-bike.png', displayName: 'Electric Bike' },
-  { id: 3, name: 'e-roller', image: 'e-roller.png', displayName: 'Electric Scooter' },
-  { id: 4, name: 'e-scooter', image: 'e-scooter.png', displayName: 'E-Scooter' },
-  { id: 5, name: 'smart-home', image: 'smart-home.png', displayName: 'Smart Home' },
-  { id: 6, name: 'solar-inverter', image: 'solar-inverter.png', displayName: 'Solar Inverter' },
-  { id: 7, name: 'home-battery', image: 'home-battery.png', displayName: 'Home Battery' },
-  { id: 8, name: 'smart-meter', image: 'smart-meter.png', displayName: 'Smart Meter' },
-  { id: 9, name: 'charging-station', image: 'charging-station.png', displayName: 'Charging Station' },
-  { id: 10, name: 'heat-pump', image: 'heat-pump.png', displayName: 'Heat Pump' },
-  { id: 11, name: 'solar-panel', image: 'solar-panel.png', displayName: 'Solar Panel' },
-  { id: 12, name: 'electric-boiler', image: 'electric-boiler.png', displayName: 'Electric Boiler' },
-  { id: 13, name: 'power-bank', image: 'power-bank.png', displayName: 'Power Bank' },
-  { id: 14, name: 'charge-controller', image: 'charge-controller.png', displayName: 'Charge Controller' },
-  { id: 15, name: 'smartphone', image: 'smartphone.png', displayName: 'Smartphone' },
+  { id: 1, name: 'e-car', image: 'e-car.png', displayName: 'Electric Car', rarity: 'common' as const },
+  { id: 2, name: 'e-bike', image: 'e-bike.png', displayName: 'Electric Bike', rarity: 'common' as const },
+  { id: 3, name: 'e-roller', image: 'e-roller.png', displayName: 'Electric Scooter', rarity: 'common' as const },
+  { id: 4, name: 'e-scooter', image: 'e-scooter.png', displayName: 'E-Scooter', rarity: 'common' as const },
+  { id: 5, name: 'smart-home', image: 'smart-home.png', displayName: 'Smart Home', rarity: 'common' as const },
+  { id: 6, name: 'solar-inverter', image: 'solar-inverter.png', displayName: 'Solar Inverter', rarity: 'uncommon' as const },
+  { id: 7, name: 'home-battery', image: 'home-battery.png', displayName: 'Home Battery', rarity: 'uncommon' as const },
+  { id: 8, name: 'smart-meter', image: 'smart-meter.png', displayName: 'Smart Meter', rarity: 'uncommon' as const },
+  { id: 9, name: 'charging-station', image: 'charging-station.png', displayName: 'Charging Station', rarity: 'uncommon' as const },
+  { id: 10, name: 'heat-pump', image: 'heat-pump.png', displayName: 'Heat Pump', rarity: 'uncommon' as const },
+  { id: 11, name: 'solar-panel', image: 'solar-panel.png', displayName: 'Solar Panel', rarity: 'rare' as const },
+  { id: 12, name: 'electric-boiler', image: 'electric-boiler.png', displayName: 'Electric Boiler', rarity: 'rare' as const },
+  { id: 13, name: 'power-bank', image: 'power-bank.png', displayName: 'Power Bank', rarity: 'rare' as const },
+  { id: 14, name: 'charge-controller', image: 'charge-controller.png', displayName: 'Charge Controller', rarity: 'epic' as const },
+  { id: 15, name: 'smartphone', image: 'smartphone.png', displayName: 'Smartphone', rarity: 'legendary' as const },
 ] as const
+
+// NFT Rarity definitions
+export type NFTRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+
+export const RARITY_COLORS: Record<NFTRarity, string> = {
+  common: 'from-gray-400 to-gray-600',
+  uncommon: 'from-green-400 to-green-600',
+  rare: 'from-blue-400 to-blue-600',
+  epic: 'from-purple-400 to-purple-600',
+  legendary: 'from-yellow-400 to-orange-500'
+}
+
+export const RARITY_GLOW: Record<NFTRarity, string> = {
+  common: 'shadow-lg',
+  uncommon: 'shadow-green-500/50',
+  rare: 'shadow-blue-500/50',
+  epic: 'shadow-purple-500/50',
+  legendary: 'shadow-yellow-500/50'
+}
 
 // Animation durations
 export const ANIMATION = {

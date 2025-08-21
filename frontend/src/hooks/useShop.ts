@@ -35,15 +35,17 @@ export function useShop() {
       plantName?: string
     }
   } | null>(null)
+  const [processedTransactionHash, setProcessedTransactionHash] = useState<string | null>(null)
   
-  // Watch for transaction success to show modal
+  // Watch for transaction success to show modal (only once per transaction)
   useEffect(() => {
-    if (isSuccess && lastPurchase && !showSuccessModal) {
-      console.log('✅ Transaction confirmed! Showing success modal')
+    if (isSuccess && lastPurchase && !showSuccessModal && hash && hash !== processedTransactionHash) {
+      console.log('✅ Transaction confirmed! Showing success modal for hash:', hash)
       setShowSuccessModal(true)
       setIsProcessing(false) // Reset processing state
+      setProcessedTransactionHash(hash) // Mark this transaction as processed
     }
-  }, [isSuccess, lastPurchase, showSuccessModal])
+  }, [isSuccess, lastPurchase, showSuccessModal, hash, processedTransactionHash])
   
   // Reset processing state and modal when transaction finishes
   useEffect(() => {
@@ -60,6 +62,14 @@ export function useShop() {
       setLastPurchase(null)
     }
   }, [isPending, showSuccessModal])
+
+  // Clear processed hash when starting a new transaction
+  useEffect(() => {
+    if (isPending && hash && hash !== processedTransactionHash) {
+      console.log('🔄 New transaction pending, clearing processed hash')
+      setProcessedTransactionHash(null)
+    }
+  }, [isPending, hash, processedTransactionHash])
 
   // Read shop prices
   const { data: pricesData } = useReadContract({
@@ -458,7 +468,12 @@ export function useShop() {
     purchasePlantToken,
     getUSDTFromFaucet,
     approveUSDT,
-    closeSuccessModal: () => setShowSuccessModal(false),
+    closeSuccessModal: () => {
+      console.log('🔄 Closing success modal and resetting states')
+      setShowSuccessModal(false)
+      setLastPurchase(null)
+      // Don't reset processedTransactionHash to prevent modal from reopening
+    },
     
     // Utilities
     formatUSDT,
