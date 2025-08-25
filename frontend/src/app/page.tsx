@@ -2,15 +2,15 @@
 
 import { useAccount, useConnect } from 'wagmi'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 
 import { ResponsiveGridWithDetail } from '@/components/collection/responsive-grid-with-detail'
 
 import { AppNavigation } from '@/components/navigation/app-navigation'
 import { TradingInterface } from '@/components/trading/trading-interface'
 import { useContracts } from '@/hooks/useContracts'
-import { useBlockchainNFTData, useBlockchainPlantData, useCanCreatePlant } from '@/hooks/useBlockchainData'
-import { useAutoConnect } from '@/hooks/useAutoConnect'
+import { useBlockchainNFTData, useBlockchainPlantData } from '@/hooks/useBlockchainData'
+
 
 import { PageTemplate } from '@/components/layout/page-template'
 import { PageHeader } from '@/components/layout/page-header'
@@ -25,7 +25,7 @@ import { NFT_TYPES } from '@/lib/constants'
 export default function SimplePage() {
   const { address, isConnected } = useAccount()
   const { connect, connectors, isPending } = useConnect()
-  const { isAutoConnecting, hasAttempted } = useAutoConnect()
+  // Removed complex auto-connect logic - use same simple approach as shop page
   const { questNFT, plantToken } = useContracts()
   
   const [activeTab, setActiveTab] = useState('collection')
@@ -117,7 +117,8 @@ export default function SimplePage() {
     transition: { duration: 0.6 }
   }
 
-  if (!isConnected && hasAttempted) {
+  // Simple wallet check - same as shop page
+  if (!isConnected) {
     return (
       <PageTemplate
         header={<PageHeader title="Connect Your Wallet" description="Choose your preferred wallet to access your NFT collection" />}
@@ -134,7 +135,9 @@ export default function SimplePage() {
                 {connectors.map((connector) => (
                   <button
                     key={connector.uid}
-                    onClick={() => connect({ connector })}
+                    onClick={() => {
+                      connect({ connector })
+                    }}
                     disabled={isPending}
                     className="btn btn-outline w-full"
                     type="button"
@@ -165,134 +168,9 @@ export default function SimplePage() {
       animate="animate"
       transition={{ duration: 0.6 }}
     >
-      {/* Show loading during auto-connect attempt */}
-      {(isAutoConnecting || isPending || (!hasAttempted && !isConnected)) ? (
-        <div className="flex items-center justify-center min-h-screen bg-secondary">
-          <div className="text-center max-w-md mx-auto">
-            <motion.div
-              className="text-8xl mb-6"
-              animate={{ 
-                scale: [1, 1.1, 1],
-                rotate: [0, 5, -5, 0]
-              }}
-              transition={{ 
-                duration: 2, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-            >
-              🇨🇭
-            </motion.div>
-            <motion.h1 
-              className="text-3xl font-bold text-foreground mb-3"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              Booster Collection
-            </motion.h1>
-            <motion.p 
-              className="text-muted-foreground text-lg mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              {isAutoConnecting || isPending ? 'Connecting to your wallet...' : 'Initializing Swiss Energy NFTs...'}
-            </motion.p>
-            
-            {/* Loading Animation */}
-            <motion.div
-              className="flex justify-center space-x-2 mb-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  className="w-3 h-3 bg-blue-500 rounded-full"
-                  animate={{
-                    y: [0, -20, 0],
-                    opacity: [0.5, 1, 0.5]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    delay: i * 0.2,
-                    ease: "easeInOut"
-                  }}
-                />
-              ))}
-            </motion.div>
-
-            <motion.div 
-              className="text-sm text-muted-foreground mb-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-            >
-              Powered by Swiss Technology ⚡
-            </motion.div>
-
-            {/* Skip Button after 2 seconds */}
-            <motion.button
-              className="text-primary hover:text-foreground text-sm font-medium transition-colors"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2 }}
-              onClick={() => {
-                // Force stop auto-connect and show manual connection
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('skipAutoConnect', 'true')
-                }
-                window.location.reload()
-              }}
-            >
-              Connect manually instead →
-            </motion.button>
-          </div>
-        </div>
-      ) : !isConnected ? (
-        /* Fallback manual connection if auto-connect fails */
-        <div className="flex items-center justify-center min-h-screen bg-secondary">
-          <div className="text-center max-w-md mx-auto">
-            <motion.div
-              className="text-6xl mb-6"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              🔐
-            </motion.div>
-            <h1 className="text-2xl font-bold text-foreground mb-4">Connect Your Wallet</h1>
-            <p className="text-muted-foreground mb-8">Choose your preferred wallet to access your Swiss Energy NFT Collection</p>
-            
-            <div className="space-y-3">
-              {connectors.slice(0, 3).map((connector) => (
-                <motion.button
-                  key={connector.uid}
-                  onClick={() => connect({ connector })}
-                  disabled={isPending}
-                  className="w-full bg-white border border-gray-200 rounded-xl p-4 hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  type="button"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="text-2xl">
-                      {connector.name === 'MetaMask' ? '🦊' : 
-                       connector.name === 'WalletConnect' ? '🔗' : 
-                       connector.name === 'Coinbase Wallet' ? '🔵' : '💳'}
-                    </div>
-                  <span className="font-semibold text-foreground">{connector.name}</span>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col min-h-screen">
+      {/* Main App Content */}
+      <div className="flex flex-col min-h-screen">{/* Main App Content starts here */}
+        {/* App Navigation */}
           <AppNavigation
             key={`nav-${plantsCreated}`} // Force re-render when plantsCreated changes
             activeTab={activeTab}
@@ -389,9 +267,6 @@ export default function SimplePage() {
             </div>
           </main>
         </div>
-      )}
-
-      
       {/* Plant Creation Success Modal */}
       <PurchaseSuccessModal
         isOpen={plantToken.showSuccessModal}
