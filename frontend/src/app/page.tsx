@@ -1,6 +1,6 @@
 'use client'
 
-import { useAccount, useConnect } from 'wagmi'
+import { useAccount } from 'wagmi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 
@@ -12,20 +12,18 @@ import { useContracts } from '@/hooks/useContracts'
 import { useBlockchainNFTData, useBlockchainPlantData } from '@/hooks/useBlockchainData'
 
 
-import { PageTemplate } from '@/components/layout/page-template'
-import { PageHeader } from '@/components/layout/page-header'
+
 
 import { PlantCreationPanel } from '@/components/plants/plant-creation-panel'
 import { PurchaseSuccessModal } from '@/components/shop/purchase-success-modal'
 import { NFT_TYPES } from '@/lib/constants'
+import { ShoppingCartIcon } from '@heroicons/react/24/outline'
 // import type { UserNFT } from '@/types/nft'
 
 
 
 export default function SimplePage() {
   const { address, isConnected } = useAccount()
-  const { connect, connectors, isPending } = useConnect()
-  // Removed complex auto-connect logic - use same simple approach as shop page
   const { questNFT, plantToken } = useContracts()
   
   const [activeTab, setActiveTab] = useState('collection')
@@ -117,46 +115,16 @@ export default function SimplePage() {
     transition: { duration: 0.6 }
   }
 
-  // Simple wallet check - same as shop page
+  // EXACT same wallet check as Shop page
   if (!isConnected) {
     return (
-      <PageTemplate
-        header={<PageHeader title="Connect Your Wallet" description="Choose your preferred wallet to access your NFT collection" />}
-      >
-        <motion.div
-          variants={pageVariants}
-          initial="initial"
-          animate="animate"
-          className="w-full max-w-md mx-auto"
-        >
-          <div className="card">
-            <div className="card-content">
-              <div className="space-y-4">
-                {connectors.map((connector) => (
-                  <button
-                    key={connector.uid}
-                    onClick={() => {
-                      connect({ connector })
-                    }}
-                    disabled={isPending}
-                    className="btn btn-outline w-full"
-                    type="button"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="text-xl">
-                        {connector.name === 'MetaMask' ? '🦊' : 
-                         connector.name === 'WalletConnect' ? '🔗' : 
-                         connector.name === 'Coinbase Wallet' ? '🔵' : '💳'}
-                      </div>
-                      <span className="font-semibold text-foreground">{connector.name}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </PageTemplate>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <ShoppingCartIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect Wallet</h2>
+          <p className="text-gray-600">Please connect your wallet to access the shop</p>
+        </div>
+      </div>
     )
   }
 
